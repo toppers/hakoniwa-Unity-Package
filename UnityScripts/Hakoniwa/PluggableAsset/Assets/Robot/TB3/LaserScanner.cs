@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot;
+﻿using Assets.Scripts.Hakoniwa.PluggableAsset;
+using Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot;
 using Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot.TB3;
 using Hakoniwa.Core.Utils;
 using Hakoniwa.PluggableAsset.Assets.Robot;
@@ -24,12 +25,23 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private float angle_increment = 0.0174532923847f; //← 0.01745 rad = 1°
         private float time_increment = 2.98800005112e-05f;
         private float scan_time = 0.0f;
+        private float magnification = 1.0f;
         private Quaternion init_angle;
 
         public void Initialize(object root)
         {
             this.sensor = (GameObject)root;
             this.init_angle = this.transform.localRotation;
+            if (AssetConfigLoader.core_config.param_world_config != null)
+            {
+                if (AssetConfigLoader.core_config.param_world_config.magnification != null)
+                {
+                    if (AssetConfigLoader.core_config.param_world_config.magnification.scan_distance != null)
+                    {
+                        this.magnification = AssetConfigLoader.core_config.param_world_config.magnification.scan_distance;
+                    }
+                }
+            }
         }
         public void UpdateSensorData(Pdu pdu)
         {
@@ -51,7 +63,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             this.sensor.transform.localRotation = this.init_angle;
             for (int i = 0; i < max_count; i++)
             {
-                distances[i] = GetSensorValue(i) / 100.0f;
+                distances[i] = (GetSensorValue(i) * this.magnification) / 100.0f;
                 this.sensor.transform.Rotate(0, 1, 0);
             }
         }
