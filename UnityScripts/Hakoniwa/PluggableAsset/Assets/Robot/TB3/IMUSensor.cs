@@ -74,7 +74,7 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot.TB3
         public void UpdateSensorData(Pdu pdu)
         {
             TimeStamp.Set(pdu);
-            pdu.Ref("header").SetData("frame_id", "imu");
+            pdu.Ref("header").SetData("frame_id", "imu_link");
 
             //orientation
             UpdateOrientation(pdu);
