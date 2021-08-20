@@ -1,4 +1,5 @@
-﻿using Hakoniwa.PluggableAsset.Communication.Pdu;
+﻿using Hakoniwa.PluggableAsset;
+using Hakoniwa.PluggableAsset.Communication.Pdu;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private int motor_power = 500;
         private float motor_interval_distance = 16.0f; // 16cm
         private IPduReader pdu_reader;
+        private ParamScale scale;
 
         internal Motor GetRightMotor()
         {
@@ -29,6 +31,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         {
             GameObject obj;
             this.pdu_reader = pdu_reader;
+
+            this.scale = AssetConfigLoader.GetScale();
 
             for (int i = 0; i < 2; i++)
             {
@@ -63,9 +67,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             double target_velocity;
             double target_rotation_angle_rate;
 
-            target_velocity = this.pdu_reader.GetReadOps().Ref("linear").GetDataFloat64("x");
+            target_velocity = this.pdu_reader.GetReadOps().Ref("linear").GetDataFloat64("x") * this.scale.cmdvel;
             target_rotation_angle_rate = this.pdu_reader.GetReadOps().Ref("angular").GetDataFloat64("z");
 
+            //Debug.Log("scale.cmdvel=" + this.scale.cmdvel);
             //Debug.Log("target_velocity=" + target_velocity);
             //Debug.Log("target_rotation_angle_rate=" + target_rotation_angle_rate);
             // V_R(右車輪の目標速度) = V(目標速度) + d × ω(目標角速度)

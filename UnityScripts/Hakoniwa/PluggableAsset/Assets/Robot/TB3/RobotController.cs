@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine;
 
 using Hakoniwa.Core;
+using Hakoniwa.PluggableAsset;
 using Hakoniwa.PluggableAsset.Assets;
 using Hakoniwa.PluggableAsset.Communication.Connector;
 using Hakoniwa.PluggableAsset.Communication.Pdu;
@@ -32,6 +33,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private MotorController motor_controller;
         private int tf_num = 1;
         private long current_timestamp;
+        private ParamScale scale;
 
         public void CopySensingDataToPdu()
         {
@@ -69,13 +71,6 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             //position[0] = this.motor_controller.GetLeftMotor().GetDegree() * Mathf.Deg2Rad;
             //position[1] = this.motor_controller.GetRightMotor().GetDegree() * Mathf.Deg2Rad;
 
-#if false
-            Debug.Log("IMU=" + imu.GetCurrentEulerAngle() 
-                + " R:d_rot=" + this.motor_controller.GetRightMotor().GetDeltaEulerAngle()
-                + " R:rot=" + this.motor_controller.GetRightMotor().GetDegree());
-            Debug.Log("IMU=" + motor_controller.GetRightMotor().GetCurrentAngle().eulerAngles + " Wheel=" + imu.GetCurrentAngle().eulerAngles);
-            Debug.Log("IMU-Wheel=" + (motor_controller.GetRightMotor().GetCurrentAngle() * Quaternion.Inverse(imu.GetCurrentAngle()).eulerAngles));
-#endif
 
             //velocity
             double[] velocity = new double[2];
@@ -169,6 +164,19 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             delta_angle.y = 0f;
             delta_angle.z = unity_delta_angle.y * Mathf.Deg2Rad;
 
+            /********
+             * SCALE
+             ********/
+            //pos
+            current_pos.x = current_pos.x * this.scale.odom;
+            current_pos.y = current_pos.y * this.scale.odom;
+            current_pos.z = current_pos.z * this.scale.odom;
+
+            //delta_pos
+            delta_pos.x = delta_pos.x * this.scale.odom;
+            delta_pos.y = delta_pos.y * this.scale.odom;
+            delta_pos.z = delta_pos.z * this.scale.odom;
+
             /*
              * PDU
              */
@@ -211,6 +219,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         public void Initialize()
         {
             Debug.Log("TurtleBot3");
+            this.scale = AssetConfigLoader.GetScale();
+
             this.root = GameObject.Find("Robot");
             this.myObject = GameObject.Find("Robot/" + this.transform.name);
             this.parts = myObject.GetComponentInChildren<ITB3Parts>();

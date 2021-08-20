@@ -12,7 +12,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
         public float distanceValue; /* cm */
         private GameObject frontSensor;
         private Quaternion init_angle;
-        private float magnification = 1.0f;
+        private ParamScale scale;
 
         public void Initialize(System.Object root)
         {
@@ -21,16 +21,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
                 this.distanceValue = this.contact_distance;
                 return;
             }
-            if (AssetConfigLoader.core_config.param_world_config != null)
-            {
-                if (AssetConfigLoader.core_config.param_world_config.magnification != null)
-                {
-                    if (AssetConfigLoader.core_config.param_world_config.magnification.scan_distance != null)
-                    {
-                        this.magnification = AssetConfigLoader.core_config.param_world_config.magnification.scan_distance;
-                    }
-                }
-            }
+            this.scale = AssetConfigLoader.GetScale();
             frontSensor = (GameObject)root;
             this.distanceValue = this.contact_distance;
             this.init_angle = this.transform.localRotation;
@@ -40,10 +31,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
         {
             if ((this.distanceValue < 3) || (this.distanceValue > 249))
             {
-                return 255.0f * this.magnification;
+                return 255.0f * this.scale.scan;
             }
             //Debug.Log("distance=" + this.distanceValue);
-            return distanceValue * this.magnification; /* centimeters */
+            return distanceValue * this.scale.scan; /* centimeters */
         }
         private float GetSensorValue(int inx, Color color)
         {
