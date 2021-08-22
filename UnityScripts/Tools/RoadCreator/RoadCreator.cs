@@ -1,48 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 using UnityEditor;
 using System.IO;
 using Newtonsoft.Json;
 using Hakoniwa.Tools.RoadMap;
+using Hakoniwa.Core.Utils.Logger;
 
-public class CreateRoads : EditorWindow
+public class RoadCreator : MonoBehaviour
 {
-    private int index = 0;
-    private GameObject parent;
-    private RoadMap map;
-    private Dictionary<string, RoadEntryInstance> hash = new Dictionary<string, RoadEntryInstance>();
+    private static ISimpleLogger logger;
+    private static int index = 0;
+    private static GameObject parent;
+    private static RoadMap map;
+    private static Dictionary<string, RoadEntryInstance> hash = new Dictionary<string, RoadEntryInstance>();
 
-    [MenuItem("Window/Create Other/Create Roads")]
-    static void Init()
+    public static void Initialize()
     {
-        EditorWindow.GetWindow<CreateRoads>(true, "Create Roads");
-    }
-    void OnEnable()
-    {
-        if (Selection.gameObjects.Length > 0) parent = Selection.gameObjects[0];
-    }
-    void OnSelectionChange()
-    {
-        Repaint();
-    }
-    void OnGUI()
-    {
-        try
+        parent = GameObject.Find("Roads");
+        if (logger == null)
         {
-
-            parent = EditorGUILayout.ObjectField("Parent", parent, typeof(GameObject), true) as GameObject;
-
-            GUILayout.Label("", EditorStyles.boldLabel);
-            if (GUILayout.Button("Create"))
-            {
-                Create();
-            }
+            logger = new SimpleLogger("./hakoniwa_road.log", false);
         }
-        catch (System.FormatException) { }
+        logger.Log(Level.DEBUG, "parent=" + parent.name);
     }
-
-    private int GetInstanceAngleIndex(RoadEntryInstance e)
+    private static int GetInstanceAngleIndex(RoadEntryInstance e)
     {
         float rotation = 0;
         if (e.cfg_entry.rotation < 0)
@@ -53,11 +36,11 @@ public class CreateRoads : EditorWindow
         {
             rotation = e.cfg_entry.rotation;
         }
-        //Debug.Log("rotation=" + rotation + " index=" +(int)rotation/90) ;
+        //logger.Log(Level.Debug,"rotation=" + rotation + " index=" +(int)rotation/90) ;
         return ((int)rotation / 90);
     }
 
-    private int GetRelativeAngleIndex(RoadEntryInstance e, int cinx)
+    private static int GetRelativeAngleIndex(RoadEntryInstance e, int cinx)
     {
         int instance_angle_index = GetInstanceAngleIndex(e);
 
@@ -66,16 +49,16 @@ public class CreateRoads : EditorWindow
         {
             inx += 4;
         }
-        //Debug.Log("index=" + inx);
+        //logger.Log(Level.Debug,"index=" + inx);
         return inx;
     }
 
-    private float GetShiftSizeZ(RoadEntryInstance e, int cinx)
+    private static float GetShiftSizeZ(RoadEntryInstance e, int cinx)
     {
-        //Debug.Log("GetShiftSizeZ: cinx=" + cinx + "GetAngleIndex(e, cinx)=" + GetAngleIndex(e, cinx));
+        //logger.Log(Level.Debug,"GetShiftSizeZ: cinx=" + cinx + "GetAngleIndex(e, cinx)=" + GetAngleIndex(e, cinx));
         int instance_angle_index = GetInstanceAngleIndex(e);
         int rinx = GetRelativeAngleIndex(e, cinx);
-        //Debug.Log("GetShiftSizeZ: inx=" + inx);
+        //logger.Log(Level.Debug,"GetShiftSizeZ: inx=" + inx);
         switch (instance_angle_index)
         {
             case 0:
@@ -91,11 +74,11 @@ public class CreateRoads : EditorWindow
         }
         return 0;
     }
-    private float GetShiftSizeX(RoadEntryInstance e, int cinx)
+    private static float GetShiftSizeX(RoadEntryInstance e, int cinx)
     {
         int rinx = GetRelativeAngleIndex(e, cinx);
         int instance_angle_index = GetInstanceAngleIndex(e);
-        //Debug.Log("GetShiftSizeZ: inx=" + inx);
+        //logger.Log(Level.Debug,"GetShiftSizeZ: inx=" + inx);
         switch (instance_angle_index)
         {
             case 0:
@@ -112,7 +95,7 @@ public class CreateRoads : EditorWindow
         return 0;
     }
 
-    private int GetLocateIndex(RoadEntryInstance e)
+    private static int GetLocateIndex(RoadEntryInstance e)
     {
         int index = 0;
         if (e.cfg_entry.connect_direction.Contains("z"))
@@ -139,7 +122,7 @@ public class CreateRoads : EditorWindow
         }
         return index;
     }
-    private int GetReverseLocateIndex(RoadEntryInstance e)
+    private static int GetReverseLocateIndex(RoadEntryInstance e)
     {
         int index = 0;
         if (e.cfg_entry.connect_direction.Contains("z"))
@@ -166,7 +149,7 @@ public class CreateRoads : EditorWindow
         }
         return index;
     }
-    private void CalculatePos(RoadEntryInstance prev_e, RoadEntryInstance e)
+    private static void CalculatePos(RoadEntryInstance prev_e, RoadEntryInstance e)
     {
         //prev prefab name     instance_angle    x, z, can_locate
         //current prefab name  instance_angle    locate_angle
@@ -177,7 +160,7 @@ public class CreateRoads : EditorWindow
         int r_locate_index = GetReverseLocateIndex(e);
         int rinx = GetRelativeAngleIndex(prev_e, locate_index);
 
-        Debug.Log("LOCATION-INDEX: " + locate_index);
+        logger.Log(Level.DEBUG, "LOCATION-INDEX: " + locate_index);
 
         if (prev_e.cfg_entry.scale > 0.0f)
         {
@@ -185,7 +168,7 @@ public class CreateRoads : EditorWindow
         }
         float prev_size_z = GetShiftSizeZ(prev_e, locate_index) * scale;
         float prev_size_x = GetShiftSizeX(prev_e, locate_index) * scale;
-        Debug.Log("PREV: " + prev_e.prefab_fname + "angle: " + GetInstanceAngleIndex(prev_e)
+        logger.Log(Level.DEBUG, "PREV: " + prev_e.prefab_fname + "angle: " + GetInstanceAngleIndex(prev_e)
             + " Z=" + prev_size_z + " X=" + prev_size_x + " RINX=" + rinx);
 
         if (!prev_e.parts_type.shift_size[rinx].can_locate)
@@ -202,7 +185,7 @@ public class CreateRoads : EditorWindow
         int crinx = GetRelativeAngleIndex(e, r_locate_index);
         float c_size_z = -1.0f * GetShiftSizeZ(e, r_locate_index) * scale;
         float c_size_x = -1.0f * GetShiftSizeX(e, r_locate_index) * scale;
-        Debug.Log("CURR: " + e.prefab_fname + "angle: " + GetInstanceAngleIndex(e) 
+        logger.Log(Level.DEBUG, "CURR: " + e.prefab_fname + "angle: " + GetInstanceAngleIndex(e)
             + " Z=" + c_size_z + " X=" + c_size_x + " RINX=" + crinx);
         pos_z += (prev_size_z + c_size_z);
         pos_x += (prev_size_x + c_size_x);
@@ -211,7 +194,7 @@ public class CreateRoads : EditorWindow
         e.pos.x = pos_x;
         return;
     }
-    private void CreateEntry(ref RoadEntryInstance e, ref RoadEntryInstance prev_e, RoadMapEntry entry)
+    private static void CreateEntry(ref RoadEntryInstance e, ref RoadEntryInstance prev_e, RoadMapEntry entry)
     {
         var e_type = RoadEntryInstance.Get(entry.prefab_name);
         e = new RoadEntryInstance(entry);
@@ -221,12 +204,12 @@ public class CreateRoads : EditorWindow
         {
             CalculatePos(prev_e, e);
         }
-        this.LoadPrefab(e);
+        LoadPrefab(e);
         prev_e = e;
         hash[entry.prefab_name] = e;
         RoadEntryInstance.AddInstance(e);
     }
-    private int GetRepeatNum(RoadMapEntry entry)
+    private static int GetRepeatNum(RoadMapEntry entry)
     {
         if (entry.repeat_num > 0)
         {
@@ -237,19 +220,24 @@ public class CreateRoads : EditorWindow
             return 1;
         }
     }
-    private void Create()
+    public static void Create()
     {
-        this.index = 0;
+        if (parent == null)
+        {
+            return;
+        }
+        index = 0;
         RoadEntryInstance e = null;
         RoadEntryInstance prev_e = null;
 
         string jsonString = File.ReadAllText("./road_map.json");
-        this.map = JsonConvert.DeserializeObject<RoadMap>(jsonString);
+        map = JsonConvert.DeserializeObject<RoadMap>(jsonString);
 
-        jsonString = File.ReadAllText("./road_parts_type.json");
+        //jsonString = File.ReadAllText("./road_parts_type.json");
+        jsonString = Resources.Load<TextAsset>("road_parts_type").ToString();
         RoadEntryInstance.parts = JsonConvert.DeserializeObject<RoadParts>(jsonString);
 
-        foreach (var entry in this.map.entries)
+        foreach (var entry in map.entries)
         {
             if (prev_e != null)
             {
@@ -277,9 +265,16 @@ public class CreateRoads : EditorWindow
             }
         }
     }
-    private void LoadPrefab(RoadEntryInstance road_entry)
+    private static void LoadPrefab(RoadEntryInstance road_entry)
     {
-        var p = AssetDatabase.LoadAssetAtPath<GameObject>(road_entry.parts_type.prefab_path + "/" + road_entry.prefab_fname);
+        string path = road_entry.parts_type.prefab_path + "/" + road_entry.prefab_fname;
+        path = path.Split('.')[0];
+        //var p = AssetDatabase.LoadAssetAtPath<GameObject>(road_entry.parts_type.prefab_path + "/" + road_entry.prefab_fname);
+        var p = Resources.Load< GameObject>(path);
+        if (p == null)
+        {
+            Debug.LogError("path is not found:" + path);
+        }
         road_entry.instance = Instantiate(p, road_entry.pos, Quaternion.identity) as GameObject;
 
         if (road_entry.cfg_entry.name != null)
@@ -293,8 +288,9 @@ public class CreateRoads : EditorWindow
         if (parent)
         {
             road_entry.instance.transform.parent = parent.transform;
+            road_entry.instance.transform.parent = parent.transform;
         }
-        Undo.RegisterCreatedObjectUndo(road_entry.instance, "Create Roads");
+        //Undo.RegisterCreatedObjectUndo(road_entry.instance, "Create Roads");
 
         road_entry.instance.transform.Rotate(0, road_entry.cfg_entry.rotation, 0);
         if (road_entry.cfg_entry.scale > 0.0f)
@@ -302,10 +298,25 @@ public class CreateRoads : EditorWindow
             road_entry.instance.transform.localScale = new Vector3(road_entry.instance.transform.localScale.x, road_entry.instance.transform.localScale.y, road_entry.cfg_entry.scale);
         }
         var bounds = road_entry.instance.GetComponentInChildren<MeshRenderer>().bounds;
-        Debug.Log(road_entry.prefab_fname + " : road_pos.instance scale=" + bounds.size);
-        //Debug.Log("road_pos.rotation_angle=" + road_entry.cfg_entry.rotation);
+        logger.Log(Level.DEBUG, road_entry.prefab_fname + " : road_pos.instance scale=" + bounds.size);
+        //logger.Log(Level.Debug,"road_pos.rotation_angle=" + road_entry.cfg_entry.rotation);
 
         index++;
     }
-
+    public static void ClearParts()
+    {
+        if (parent == null)
+        {
+            return;
+        }
+        Transform[] childrens = parent.GetComponentsInChildren<Transform>();
+        logger.Log(Level.DEBUG, "ClearParts:" + childrens.Length);
+        for (int i = 0; i < childrens.Length; i++)
+        {
+            if (i > 0 && childrens[i] != null)
+            {
+                Destroy(childrens[i].gameObject);
+            }
+        }
+    }
 }
