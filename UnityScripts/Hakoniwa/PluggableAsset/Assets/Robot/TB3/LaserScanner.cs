@@ -27,6 +27,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private float scan_time = 0.0f;
         private ParamScale scale;
         private Quaternion init_angle;
+        private float[] intensities = new float[0];
 
         public void Initialize(object root)
         {
@@ -47,6 +48,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             pdu.SetData("angle_increment", angle_increment);
             pdu.SetData("time_increment", time_increment);
             pdu.SetData("scan_time", scan_time);
+            pdu.SetData("intensities", intensities);
         }
 
         public void UpdateSensorValues()

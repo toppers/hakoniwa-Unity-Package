@@ -14,7 +14,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private float[] delta_angle = new float[2];  // 0: R, 1: L
         private float[] moving_distance = new float[2];  // 0: R, 1: L
         private int motor_power = 500;
-        private float motor_interval_distance = 16.0f; // 16cm
+        private float motor_interval_distance = 0.160f; // 16cm
         private IPduReader pdu_reader;
         private ParamScale scale;
 
@@ -75,8 +75,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             //Debug.Log("target_rotation_angle_rate=" + target_rotation_angle_rate);
             // V_R(右車輪の目標速度) = V(目標速度) + d × ω(目標角速度)
             // V_L(左車輪の目標速度) = V(目標速度) - d × ω(目標角速度)
-            motors[0].SetTargetVelicty((float)(target_velocity + motor_interval_distance * target_rotation_angle_rate));
-            motors[1].SetTargetVelicty((float)(target_velocity - motor_interval_distance * target_rotation_angle_rate));
+            motors[0].SetTargetVelicty((float)(target_velocity + (target_rotation_angle_rate * motor_interval_distance / 2)));
+            motors[1].SetTargetVelicty((float)(target_velocity - (target_rotation_angle_rate * motor_interval_distance / 2)));
         }
 
         internal float GetDeltaMovingDistance()
@@ -85,4 +85,3 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         }
     }
 }
-
