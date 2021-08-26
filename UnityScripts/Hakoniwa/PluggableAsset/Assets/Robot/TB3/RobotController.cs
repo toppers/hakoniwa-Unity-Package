@@ -182,10 +182,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
              */
             //header
             TimeStamp.Set(this.pdu_odometry.GetWriteOps().Ref(null));
-            this.pdu_odometry.GetWriteOps().Ref("header").SetData("frame_id", "/odom");
+            this.pdu_odometry.GetWriteOps().Ref("header").SetData("frame_id", "odom");
 
             //child_frame_id
-            this.pdu_odometry.GetWriteOps().SetData("child_frame_id", "/base_footprint");
+            this.pdu_odometry.GetWriteOps().SetData("child_frame_id", "base_footprint");
             //pose.pose.position
             this.pdu_odometry.GetWriteOps().Ref("pose").Ref("pose").Ref("position").SetData("x", (double)current_pos.x);
             this.pdu_odometry.GetWriteOps().Ref("pose").Ref("pose").Ref("position").SetData("y", (double)current_pos.y);
