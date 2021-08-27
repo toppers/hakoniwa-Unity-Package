@@ -18,6 +18,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private IPduReader pdu_reader;
         private ParamScale scale;
 
+        private float steering_sensitivity = 1.5;                // 経験値
+
         internal Motor GetRightMotor()
         {
             return motors[0];
@@ -75,8 +77,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             //Debug.Log("target_rotation_angle_rate=" + target_rotation_angle_rate);
             // V_R(右車輪の目標速度) = V(目標速度) + d × ω(目標角速度)
             // V_L(左車輪の目標速度) = V(目標速度) - d × ω(目標角速度)
-            motors[0].SetTargetVelicty((float)(target_velocity + (target_rotation_angle_rate * motor_interval_distance / 2)));
-            motors[1].SetTargetVelicty((float)(target_velocity - (target_rotation_angle_rate * motor_interval_distance / 2)));
+            motors[0].SetTargetVelicty((float)(target_velocity + (steering_sensitivity * target_rotation_angle_rate * motor_interval_distance / 2)));
+            motors[1].SetTargetVelicty((float)(target_velocity - (steering_sensitivity * target_rotation_angle_rate * motor_interval_distance / 2)));
         }
 
         internal float GetDeltaMovingDistance()
