@@ -197,8 +197,13 @@ public class RoadCreator : MonoBehaviour
     private static void CreateEntry(ref RoadEntryInstance e, ref RoadEntryInstance prev_e, RoadMapEntry entry)
     {
         var e_type = RoadEntryInstance.Get(entry.prefab_name);
-        e = new RoadEntryInstance(entry);
+        if (e_type == null)
+        {
+            throw new InvalidDataException("ERROR: Not found prefab=" + entry.prefab_name);
+        }
+        e = new RoadEntryInstance(entry, e_type);
         e.parts_type = e_type;
+        Debug.Log("parts_type=" + e_type);
         e.cfg_entry = entry;
         if (prev_e != null)
         {
@@ -233,8 +238,7 @@ public class RoadCreator : MonoBehaviour
         string jsonString = File.ReadAllText("./road_map.json");
         map = JsonConvert.DeserializeObject<RoadMap>(jsonString);
 
-        //jsonString = File.ReadAllText("./road_parts_type.json");
-        jsonString = Resources.Load<TextAsset>("road_parts_type").ToString();
+        jsonString = File.ReadAllText("./road_parts_type.json");
         RoadEntryInstance.parts = JsonConvert.DeserializeObject<RoadParts>(jsonString);
 
         foreach (var entry in map.entries)
@@ -265,17 +269,28 @@ public class RoadCreator : MonoBehaviour
             }
         }
     }
+
     private static void LoadPrefab(RoadEntryInstance road_entry)
     {
+        //Debug.Log("road_entry=" + road_entry);
+        //Debug.Log("prefab_fname=" + road_entry.prefab_fname);
+        //Debug.Log("prefab_path=" + road_entry.parts_type.prefab_path);
         string path = road_entry.parts_type.prefab_path + "/" + road_entry.prefab_fname;
-        path = path.Split('.')[0];
-        //var p = AssetDatabase.LoadAssetAtPath<GameObject>(road_entry.parts_type.prefab_path + "/" + road_entry.prefab_fname);
-        var p = Resources.Load< GameObject>(path);
+        var p = AssetDatabase.LoadAssetAtPath<GameObject>(path);
         if (p == null)
         {
-            Debug.LogError("path is not found:" + path);
+            throw new InvalidDataException("ERROR: path is not found:" + path);
         }
         road_entry.instance = Instantiate(p, road_entry.pos, Quaternion.identity) as GameObject;
+
+
+        string patch_path = "Assets/HakoniwaPatch/" + road_entry.prefab_fname;
+        var patch = AssetDatabase.LoadAssetAtPath<GameObject>(patch_path);
+        if (patch == null)
+        {
+            throw new InvalidDataException("ERROR: patch path is not found:" + patch_path);
+        }
+        road_entry.patch_instance = Instantiate(patch, road_entry.pos, Quaternion.identity) as GameObject;
 
         if (road_entry.cfg_entry.name != null)
         {
@@ -284,12 +299,27 @@ public class RoadCreator : MonoBehaviour
         else
         {
             road_entry.instance.name = p.name + "_" + index;
+            road_entry.patch_instance.name = p.name + "_collider_" + index;
         }
         if (parent)
         {
             road_entry.instance.transform.parent = parent.transform;
-            road_entry.instance.transform.parent = parent.transform;
+            road_entry.patch_instance.transform.parent = road_entry.instance.transform;
         }
+        else
+        {
+            throw new InvalidDataException("ERROR: can not found parent");
+        }
+#if false
+        //patch pos
+        if (road_entry.type.patch_pos != null)
+        {
+            var obj = road_entry.instance.transform.Find(p.name);
+            obj.transform.position += road_entry.pos;
+            //obj.transform.position = road_entry.pos;
+
+        }
+#endif
         //Undo.RegisterCreatedObjectUndo(road_entry.instance, "Create Roads");
 
         road_entry.instance.transform.Rotate(0, road_entry.cfg_entry.rotation, 0);
