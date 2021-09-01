@@ -73,6 +73,7 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
 
 
 			ros.RegisterPublisher<LaserScanMsg>("scan");
+			ros.RegisterPublisher<CompressedImageMsg>("camera");
 			ros.RegisterPublisher<ImuMsg>("imu");
 			ros.RegisterPublisher<OdometryMsg>("odom");
 			ros.RegisterPublisher<TFMessageMsg>("tf");
@@ -92,9 +93,19 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
             RosTopicPduCommTypedData typed_data = data as RosTopicPduCommTypedData;
             ros.Send(typed_data.GetDataName(), typed_data.GetTopicData());
         }
+        
+        private void Reset()
+        {
+
+            this.topic_data_table["cmd_vel"] = null;
+        }
 
         public IPduCommTypedData Recv(string topic_name)
         {
+        	if (topic_name == null) {
+        		this.Reset();
+        		return null;
+        	}
             var cfg = AssetConfigLoader.GetRosTopic(topic_name);
             if (cfg == null)
             {

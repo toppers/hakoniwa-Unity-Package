@@ -19,6 +19,10 @@ public class TurtleBot3Parts : MonoBehaviour, ITB3Parts
     {
         return "base_footprint/imu_link/base_link/base_scan/Scan";
     }
+    public string GetCamera()
+    {
+        return "base_footprint/imu_link/Body/CameraBody/CameraCase";
+    }
 
     public string GetMotor(int index)
     {

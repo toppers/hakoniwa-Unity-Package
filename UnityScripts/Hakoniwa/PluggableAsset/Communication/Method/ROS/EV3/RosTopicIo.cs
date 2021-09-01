@@ -83,9 +83,19 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3
             RosTopicPduCommTypedData typed_data = data as RosTopicPduCommTypedData;
             ros.Send(typed_data.GetDataName(), typed_data.GetTopicData());
         }
+        
+        private void Reset()
+        {
+
+            this.topic_data_table["ev3_actuator"] = null;
+        }
 
         public IPduCommTypedData Recv(string topic_name)
         {
+        	if (topic_name == null) {
+        		this.Reset();
+        		return null;
+        	}
             var cfg = AssetConfigLoader.GetRosTopic(topic_name);
             if (cfg == null)
             {

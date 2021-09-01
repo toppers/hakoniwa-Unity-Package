@@ -18,7 +18,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private IPduReader pdu_reader;
         private ParamScale scale;
 
-        private float steering_sensitivity = 1.5;                // 経験値
+        private float steering_sensitivity = 1.5f;                // 経験値
 
         internal Motor GetRightMotor()
         {
