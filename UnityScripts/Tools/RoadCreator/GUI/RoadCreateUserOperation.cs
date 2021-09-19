@@ -13,11 +13,9 @@ namespace Hakoniwa.Tools.RoadMap
     public class RoadCreateUserOperation : MonoBehaviour
     {
         private RoadEntryInstance moveobj;
-        private GameObject parentobj;
         private RoadEntryInstance lastobj;
-        private RoadEntryInstance select_obj;
+        private GameObject parentobj;
         private Dropdown road_type_obj;
-        //private int select_index = -1;
         private Text modeobj;
 
         public Sprite[] images;
@@ -177,8 +175,6 @@ namespace Hakoniwa.Tools.RoadMap
                 var objs = new UnityEngine.Object[1];
                 objs[0] = selected.instance;
                 Selection.objects = objs;
-                //this.lastobj = selected;
-                this.select_obj = selected;
                 Debug.Log("selected obj=" + selected.instance.name);
             }
         }
@@ -251,18 +247,16 @@ namespace Hakoniwa.Tools.RoadMap
 
                 if (Input.GetKeyDown(KeyCode.B))
                 {
-                    if (select_obj != null)
+                    if (RoadEntrySelector.GetSelectedIndex() >= 0)
                     {
-                        this.lastobj = select_obj;
-                        //Debug.Log("B=" + select_obj.instance.name);
+                        this.lastobj = RoadEntryInstance.GetInstanceFromIndex(RoadEntrySelector.GetSelectedIndex());
                     }
                 }
                 if (Input.GetKeyDown(KeyCode.M))
                 {
-                    if (select_obj != null)
+                    if (RoadEntrySelector.GetSelectedIndex() >= 0)
                     {
-                        this.moveobj = select_obj;
-                        //Debug.Log("M=" + select_obj.instance.name);
+                        this.moveobj = RoadEntryInstance.GetInstanceFromIndex(RoadEntrySelector.GetSelectedIndex());
                     }
                 }
             }
@@ -300,10 +294,6 @@ namespace Hakoniwa.Tools.RoadMap
                 var e = GetSelectedInstance();
                 if (e != null)
                 {
-                    if (this.select_obj == e)
-                    {
-                        this.select_obj = null;
-                    }
                     RoadEntryInstance.RemoveInstance(e);
                     this.lastobj = RoadEntryInstance.GetLastObj();
                     RoadEntryComposer.DestroyOne(e);
