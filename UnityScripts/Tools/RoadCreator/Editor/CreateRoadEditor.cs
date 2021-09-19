@@ -5,6 +5,8 @@ using UnityEditor;
 using System.IO;
 using Newtonsoft.Json;
 
+using Hakoniwa.Tools.RoadMap;
+
 public class CreateRoadEditor : EditorWindow
 {
     private GameObject parent;
@@ -13,7 +15,7 @@ public class CreateRoadEditor : EditorWindow
     static void Init()
     {
         EditorWindow.GetWindow<CreateRoadEditor>(true, "HAKONIWA CreateRoads");
-        RoadCreator.Initialize();
+        RoadEntryComposer.Initialize();
     }
     void OnGUI()
     {
@@ -25,7 +27,7 @@ public class CreateRoadEditor : EditorWindow
             GUILayout.Label("", EditorStyles.boldLabel);
             if (GUILayout.Button("CREATE"))
             {
-                RoadCreator.Create();
+                RoadLoader.Load();
             }
         }
         catch (System.FormatException) { }
