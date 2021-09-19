@@ -10,7 +10,7 @@ namespace Hakoniwa.Tools.RoadMap
     public class RoadEntryInstance
     {
         internal static RoadParts parts;
-        internal static List<RoadEntryInstance> instances = new List<RoadEntryInstance>();
+        private static List<RoadEntryInstance> instances = new List<RoadEntryInstance>();
 
         public static RoadPartsEntry Get(string name)
         {
@@ -25,8 +25,64 @@ namespace Hakoniwa.Tools.RoadMap
         }
         public static void AddInstance(RoadEntryInstance instance)
         {
-            instances.Add(instance);
+            if (!instances.Contains(instance))
+            {
+                instances.Add(instance);
+            }
         }
+        public static RoadEntryInstance GetLastObj()
+        {
+            if (instances.Count > 0)
+            {
+                return instances[instances.Count - 1];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public static void RemoveInstance(RoadEntryInstance victim)
+        {
+            if (instances.Contains(victim))
+            {
+                instances.Remove(victim);
+            }
+        }
+        public static RoadEntryInstance GetInstanceFromIndex(int inx)
+        {
+            int index = 0;
+            foreach (var e in instances)
+            {
+                if (index == inx)
+                {
+                    //Debug.Log("name=" + e.instance.name);
+                    return e;
+                }
+                index++;
+            }
+            return null;
+        }
+        public static RoadEntryInstance GetInstanceFromObj(RoadEntryInstance obj, out int obj_index)
+        {
+            int inx = 0;
+            obj_index = -1;
+            foreach (var e in instances)
+            {
+                if (e == obj)
+                {
+                    //Debug.Log("name=" + e.instance.name);
+                    obj_index = inx;
+                    return e;
+                }
+                inx++;
+            }
+            return null;
+        }
+        public static int GetLastObjectIndex()
+        {
+            return instances.Count - 1;
+        }
+
         public static RoadEntryInstance GetInstance(string name)
         {
             foreach (var e in instances)

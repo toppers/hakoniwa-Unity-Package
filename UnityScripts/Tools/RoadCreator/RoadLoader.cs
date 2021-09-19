@@ -37,7 +37,6 @@ namespace Hakoniwa.Tools.RoadMap
                 for (int i = 0; i < RoadEntryComposer.GetRepeatNum(entry); i++)
                 {
                     var e = RoadEntryComposer.CreateEntry(ref prev_e, entry);
-                    RoadEntryComposer.road_objs.Add(e);
                 }
             }
         }
