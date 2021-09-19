@@ -14,7 +14,12 @@ public class RoadEntryComposer : MonoBehaviour
     private static int index = 0;
     private static GameObject parent;
     private static Dictionary<string, RoadEntryInstance> hash = new Dictionary<string, RoadEntryInstance>();
+    public static List<RoadEntryInstance> road_objs = new List<RoadEntryInstance>();
 
+    public static int GetLastObjectIndex()
+    {
+        return road_objs.Count - 1;
+    }
     public static void Initialize()
     {
         parent = GameObject.Find("Roads");

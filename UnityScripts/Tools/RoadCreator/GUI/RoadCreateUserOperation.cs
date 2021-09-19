@@ -12,14 +12,13 @@ namespace Hakoniwa.Tools.RoadMap
 {
     public class RoadCreateUserOperation : MonoBehaviour
     {
-        private int obj_index = 0;
         private RoadEntryInstance moveobj;
         private GameObject parentobj;
         private RoadEntryInstance lastobj;
+        private RoadEntryInstance select_obj;
         private Dropdown road_type_obj;
-        //private string base_medium_path = "Assets/CityVoxelPack/Assets/roads/medium/Prefabs/";
-        private List<RoadEntryInstance> road_objs = new List<RoadEntryInstance>();
         private int select_index = -1;
+        private Text modeobj;
 
         public Sprite[] images;
         private string[] prefab_names;
@@ -28,6 +27,8 @@ namespace Hakoniwa.Tools.RoadMap
         void Start()
         {
             parentobj = GameObject.Find("Roads");
+            modeobj = GameObject.Find("RoadEditorModeInfo").GetComponent<Text>();
+            Debug.Log("modeobj=" + modeobj.text);
             road_type_obj = GameObject.Find("RoadTypes").GetComponent<Dropdown>();
             this.moveobj = null;
             this.lastobj = null;
@@ -56,15 +57,6 @@ namespace Hakoniwa.Tools.RoadMap
 
         public void CreateParts()
         {
-            if (this.select_index < 0)
-            {
-                if (this.road_objs.Count > 0)
-                {
-                    this.select_index = this.road_objs.Count - 1;
-                    this.lastobj = GetSelectedInstance();
-                }
-            }
-
             if ((this.moveobj == null))
             {
                 RoadEntryInstance tmpobj = null;
@@ -117,29 +109,29 @@ namespace Hakoniwa.Tools.RoadMap
             }
             obj.transform.position += diffposi;
         }
-        private void DoMoveArround(RoadEntryInstance obj)
+        private void DoMoveArround(RoadEntryInstance obj, RoadEntryInstance base_obj)
         {
             bool is_move = false;
             // ç∂Ç…à⁄ìÆ
-            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.H))
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.H))
             {
                 is_move = true;
                 obj.cfg_entry.connect_direction = "-x";
             }
             // âEÇ…à⁄ìÆ
-            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.L))
+            if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.L))
             {
                 is_move = true;
                 obj.cfg_entry.connect_direction = "+x";
             }
             // ëOÇ…à⁄ìÆ
-            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.I))
             {
                 is_move = true;
                 obj.cfg_entry.connect_direction = "+z";
             }
             // å„ÇÎÇ…à⁄ìÆ
-            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.N))
+            if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.N))
             {
                 is_move = true;
                 obj.cfg_entry.connect_direction = "-z";
@@ -148,8 +140,8 @@ namespace Hakoniwa.Tools.RoadMap
             {
                 try
                 {
-                    RoadEntryPositionCalculator.CalculatePos(this.lastobj, this.moveobj);
-                    this.moveobj.instance.transform.position = this.moveobj.pos;
+                    RoadEntryPositionCalculator.CalculatePos(base_obj, obj);
+                    obj.instance.transform.position = obj.pos;
                 }
                 catch (Exception)
                 {
@@ -161,7 +153,7 @@ namespace Hakoniwa.Tools.RoadMap
         private RoadEntryInstance GetSelectedInstance()
         {
             int index = 0;
-            foreach (var e in this.road_objs)
+            foreach (var e in RoadEntryComposer.road_objs)
             {
                 if (index == this.select_index)
                 {
@@ -170,6 +162,7 @@ namespace Hakoniwa.Tools.RoadMap
                 }
                 index++;
             }
+            Debug.Log("can not select: index=" + this.select_index);
             return null;
         }
 
@@ -178,12 +171,12 @@ namespace Hakoniwa.Tools.RoadMap
             RoadEntryInstance selected = null;
             int index = 0;
 
+            //Debug.Log("select code:" + code);
             if (this.select_index < 0)
             {
                 index = 0;
-                foreach (var e in this.road_objs)
+                foreach (var e in RoadEntryComposer.road_objs)
                 {
-                    Debug.Log("select kouho:" + e.instance.name);
                     if (e == this.lastobj)
                     {
                         this.select_index = index;
@@ -194,13 +187,13 @@ namespace Hakoniwa.Tools.RoadMap
                 }
                 if (this.select_index < 0)
                 {
-                    this.select_index = this.road_objs.Count - 1;
+                    this.select_index = RoadEntryComposer.road_objs.Count - 1;
                 }
             }
 
             if ((code == KeyCode.UpArrow) || (code == KeyCode.RightArrow) || (code == KeyCode.H))
             {
-                if (this.select_index < (this.road_objs.Count - 1))
+                if (this.select_index < (RoadEntryComposer.road_objs.Count - 1))
                 {
                     this.select_index = this.select_index + 1;
                 }
@@ -213,7 +206,7 @@ namespace Hakoniwa.Tools.RoadMap
             {
                 if (this.select_index == 0)
                 {
-                    this.select_index = (this.road_objs.Count - 1);
+                    this.select_index = (RoadEntryComposer.road_objs.Count - 1);
                 }
                 else
                 {
@@ -227,7 +220,8 @@ namespace Hakoniwa.Tools.RoadMap
                 var objs = new UnityEngine.Object[1];
                 objs[0] = selected.instance;
                 Selection.objects = objs;
-                this.lastobj = selected;
+                //this.lastobj = selected;
+                this.DoSelect(this.select_index);
             }
         }
         private void DoSelect(int index)
@@ -239,7 +233,9 @@ namespace Hakoniwa.Tools.RoadMap
                 var objs = new UnityEngine.Object[1];
                 objs[0] = selected.instance;
                 Selection.objects = objs;
-                this.lastobj = selected;
+                //this.lastobj = selected;
+                this.select_obj = selected;
+                Debug.Log("selected obj=" + selected.instance.name);
             }
         }
         private void DoDeselect()
@@ -293,6 +289,8 @@ namespace Hakoniwa.Tools.RoadMap
             this.myImage.sprite = images[road_type_obj.value];
             if (this.moveobj != null)
             {
+                //******************MOVE MODE****************
+                this.modeobj.text = "MODE: MOVE";
                 //Debug.Log("lastobj=" + lastobj);
                 if (this.lastobj == null)
                 {
@@ -300,28 +298,27 @@ namespace Hakoniwa.Tools.RoadMap
                 }
                 else
                 {
-                    DoMoveArround(this.moveobj);
+                    //Debug.Log("move=" + this.moveobj.instance.name + " base=" + this.lastobj.instance.name);
+                    DoMoveArround(this.moveobj, this.lastobj);
                 }
                 DoRotate(this.moveobj);
                 if (Input.GetKeyDown(KeyCode.F))
                 {
-                    this.road_objs.Add(this.moveobj);
+                    RoadEntryComposer.road_objs.Add(this.moveobj);
                     this.moveobj.pos.x = this.moveobj.instance.transform.position.x;
                     this.moveobj.pos.z = this.moveobj.instance.transform.position.z;
                     //Debug.Log("moveobj pos=" + this.moveobj.pos);
-                    this.moveobj.instance.name = this.moveobj.instance.name + "_" + this.obj_index;
-                    this.DoSelect(this.obj_index);
-                    this.obj_index++;
+                    //this.moveobj.instance.name = this.moveobj.instance.name + "_" + RoadEntryComposer.GetLastObjectIndex();
+                    this.DoSelect(RoadEntryComposer.GetLastObjectIndex());
                     this.moveobj.instance.transform.parent = this.parentobj.transform;
-                    if (this.lastobj == null)
-                    {
-                        this.lastobj = this.moveobj;
-                    }
+                    this.lastobj = this.moveobj;
                     this.moveobj = null;
                 }
             }
             else
             {
+                this.modeobj.text = "MODE: CREATE";
+                //******************CREATE MODE****************
                 KeyCode code = KeyCode.None;
                 if (Input.GetKeyDown(KeyCode.C))
                 {
@@ -331,10 +328,15 @@ namespace Hakoniwa.Tools.RoadMap
                 {
                     DoSelect(code);
                 }
-                else if (Input.GetKeyDown(KeyCode.J) || Input.GetKeyDown(KeyCode.K))
+                else if (Input.GetKeyDown(KeyCode.J))
                 {
                     //Select object
                     DoUpdateParts(true);
+                }
+                else if (Input.GetKeyDown(KeyCode.K))
+                {
+                    //Select object
+                    DoUpdateParts(false);
                 }
                 else if (Input.GetKeyDown(KeyCode.Q))
                 {
@@ -344,6 +346,23 @@ namespace Hakoniwa.Tools.RoadMap
                 else if (Input.GetKeyDown(KeyCode.D))
                 {
                     DestoryObject();
+                }
+
+                if (Input.GetKeyDown(KeyCode.B))
+                {
+                    if (select_obj != null)
+                    {
+                        this.lastobj = select_obj;
+                        //Debug.Log("B=" + select_obj.instance.name);
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.M))
+                {
+                    if (select_obj != null)
+                    {
+                        this.moveobj = select_obj;
+                        //Debug.Log("M=" + select_obj.instance.name);
+                    }
                 }
             }
         }
@@ -378,7 +397,7 @@ namespace Hakoniwa.Tools.RoadMap
             if (this.select_index >= 0)
             {
                 var e = GetSelectedInstance();
-                this.road_objs.Remove(e);
+                RoadEntryComposer.road_objs.Remove(e);
                 if (this.lastobj == e)
                 {
                     this.lastobj = null;
