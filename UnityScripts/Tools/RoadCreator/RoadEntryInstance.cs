@@ -120,5 +120,19 @@ namespace Hakoniwa.Tools.RoadMap
             }
 
         }
+
+        public static RoadMap CreateRoadMap()
+        {
+            var map = new RoadMap();
+            map.entries = new RoadMapEntry[instances.Count];
+            int i = 0;
+            foreach (var e in instances)
+            {
+                e.cfg_entry.name = e.instance.name;
+                map.entries[i] = e.cfg_entry;
+                i++;
+            }
+            return map;
+        }
     }
 }

@@ -90,25 +90,25 @@ namespace Hakoniwa.Tools.RoadMap
             if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.H))
             {
                 is_move = true;
-                obj.cfg_entry.connect_direction = "-x";
+                obj.cfg_entry.connect_direction = "-x" +"/" + base_obj.instance.name;
             }
             // ‰E‚ÉˆÚ“®
             if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.L))
             {
                 is_move = true;
-                obj.cfg_entry.connect_direction = "+x";
+                obj.cfg_entry.connect_direction = "+x" + "/" + base_obj.instance.name;
             }
             // ‘O‚ÉˆÚ“®
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.I))
             {
                 is_move = true;
-                obj.cfg_entry.connect_direction = "+z";
+                obj.cfg_entry.connect_direction = "+z" + "/" + base_obj.instance.name;
             }
             // Œã‚ë‚ÉˆÚ“®
             if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.N))
             {
                 is_move = true;
-                obj.cfg_entry.connect_direction = "-z";
+                obj.cfg_entry.connect_direction = "-z" + "/" + base_obj.instance.name;
             }
             if (is_move)
             {
@@ -227,6 +227,10 @@ namespace Hakoniwa.Tools.RoadMap
                     {
                         this.moveobj = RoadEntryInstance.GetInstanceFromIndex(RoadEntrySelector.GetSelectedIndex());
                     }
+                }
+                if (Input.GetKeyDown(KeyCode.S))
+                {
+                    RoadSaver.Save();
                 }
             }
         }

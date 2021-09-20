@@ -46,7 +46,7 @@ namespace Hakoniwa.Tools.RoadMap
         void Update()
         {
             this.myImage.sprite = images[road_type_obj.value];
-            Debug.Log("parts_value=" + road_type_obj.value);
+            //Debug.Log("parts_value=" + road_type_obj.value);
         }
 
         public string GetCurrentSelectedPartsName()

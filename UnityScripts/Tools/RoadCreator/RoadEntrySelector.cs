@@ -19,11 +19,7 @@ namespace Hakoniwa.Tools.RoadMap
         public static bool is_select_key_down(out KeyCode code)
         {
             bool is_select = true;
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                code = KeyCode.S;
-            }
-            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 code = KeyCode.LeftArrow;
             }
