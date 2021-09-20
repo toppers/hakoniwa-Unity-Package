@@ -15,41 +15,17 @@ namespace Hakoniwa.Tools.RoadMap
         private RoadEntryInstance moveobj;
         private RoadEntryInstance lastobj;
         private GameObject parentobj;
-        private Dropdown road_type_obj;
         private Text modeobj;
-
-        public Sprite[] images;
-        private string[] prefab_names;
-        private Image myImage;
+        private RoadPartsSelector parts_selector;
 
         void Start()
         {
             parentobj = GameObject.Find("Roads");
             modeobj = GameObject.Find("RoadEditorModeInfo").GetComponent<Text>();
+            parts_selector = parentobj.GetComponent<RoadPartsSelector>();
             Debug.Log("modeobj=" + modeobj.text);
-            road_type_obj = GameObject.Find("RoadTypes").GetComponent<Dropdown>();
             this.moveobj = null;
             this.lastobj = null;
-            this.myImage = GameObject.Find("Image").GetComponent<Image>();
-            this.prefab_names = new string[17];
-            this.prefab_names[0] = "road1";
-            this.prefab_names[1] = "road2";
-            this.prefab_names[2] = "road3";
-            this.prefab_names[3] = "road3bis";
-            this.prefab_names[4] = "road4";
-            this.prefab_names[5] = "road5";
-            this.prefab_names[6] = "road10"; //d_junction
-            this.prefab_names[7] = "road14bis"; //d_junction1
-            this.prefab_names[8] = "road13"; //d_junction2
-            this.prefab_names[9] = "road13bis"; //d_junction3
-            this.prefab_names[10] = "road14"; //d_junction4
-            this.prefab_names[11] = "road14bisbis"; //d_junction5
-            this.prefab_names[12] = "road11"; //d_straight
-            this.prefab_names[13] = "road12"; //d_corner
-            this.prefab_names[14] = "road12bis"; //d_corner_junction1
-            this.prefab_names[15] = "road12bisbis"; //d_corner_junction2
-            this.prefab_names[16] = "road15"; //d_cross_road
-            Debug.Log("MousleClickEventHandler:" + road_type_obj.value);
         }
 
 
@@ -66,7 +42,7 @@ namespace Hakoniwa.Tools.RoadMap
                     entry.connect_direction = "+z";
                     tmpobj = this.lastobj;
                 }
-                entry.prefab_name = this.prefab_names[road_type_obj.value];
+                entry.prefab_name = this.parts_selector.GetCurrentSelectedPartsName();
                 this.moveobj = RoadEntryComposer.CreateEntry(ref tmpobj, entry);
             }
         }
@@ -160,10 +136,6 @@ namespace Hakoniwa.Tools.RoadMap
             selected = GetSelectedInstance();
             if (selected != null)
             {
-                var objs = new UnityEngine.Object[1];
-                objs[0] = selected.instance;
-                Selection.objects = objs;
-                //this.lastobj = selected;
                 this.DoSelect();
             }
         }
@@ -172,16 +144,13 @@ namespace Hakoniwa.Tools.RoadMap
             var selected = GetSelectedInstance();
             if (selected != null)
             {
-                var objs = new UnityEngine.Object[1];
-                objs[0] = selected.instance;
-                Selection.objects = objs;
+                this.SelectObject(selected.instance);
                 Debug.Log("selected obj=" + selected.instance.name);
             }
         }
 
         void Update()
         {
-            this.myImage.sprite = images[road_type_obj.value];
             if (this.moveobj != null)
             {
                 //******************MOVE MODE****************
@@ -227,18 +196,18 @@ namespace Hakoniwa.Tools.RoadMap
                 else if (Input.GetKeyDown(KeyCode.J))
                 {
                     //Select object
-                    DoUpdateParts(true);
+                    this.parts_selector.DoUpdateParts(true);
                 }
                 else if (Input.GetKeyDown(KeyCode.K))
                 {
                     //Select object
-                    DoUpdateParts(false);
+                    this.parts_selector.DoUpdateParts(false);
                 }
                 else if (Input.GetKeyDown(KeyCode.Q))
                 {
                     //Deselect object
                     RoadEntrySelector.DoDeselect();
-                    Selection.objects = new UnityEngine.Object[0];//TODO
+                    this.DeSelectObject();
                 }
                 else if (Input.GetKeyDown(KeyCode.D))
                 {
@@ -261,30 +230,16 @@ namespace Hakoniwa.Tools.RoadMap
                 }
             }
         }
-        private int parts_index = 0;
-        private void DoUpdateParts(bool way)
-        {
-            if (way)
-            {
-                parts_index++;
-                if (parts_index >= prefab_names.Length)
-                {
-                    parts_index = 0;
-                }
 
-            }
-            else
-            {
-                if (parts_index == 0)
-                {
-                    parts_index = prefab_names.Length - 1;
-                }
-                else
-                {
-                    parts_index--;
-                }
-            }
-            road_type_obj.value = parts_index;
+        private void DeSelectObject()
+        {
+            Selection.objects = new UnityEngine.Object[0];
+        }
+        private void SelectObject(GameObject obj)
+        {
+            var objs = new UnityEngine.Object[1];
+            objs[0] = obj;
+            Selection.objects = objs;
         }
 
         private void DestoryObject()
@@ -297,9 +252,22 @@ namespace Hakoniwa.Tools.RoadMap
                     RoadEntryInstance.RemoveInstance(e);
                     this.lastobj = RoadEntryInstance.GetLastObj();
                     RoadEntryComposer.DestroyOne(e);
-                    Selection.objects = new UnityEngine.Object[0];
+                    
                     RoadEntrySelector.DoDeselect();
+                    this.DeSelectObject();
+
+                    RoadEntrySelector.DoSelectLastObj();
+                    this.DoSelect();
                 }
+            }
+        }
+        public void DestroyAll()
+        {
+            RoadEntrySelector.DoSelectLastObj();
+            while (RoadEntrySelector.GetSelectedIndex() >= 0)
+            {
+                this.DestoryObject();
+                RoadEntrySelector.DoSelectLastObj();
             }
         }
 

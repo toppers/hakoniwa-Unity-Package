@@ -146,22 +146,7 @@ public class RoadEntryComposer : MonoBehaviour
 
         index++;
     }
-    public static void ClearParts()
-    {
-        if (parent == null)
-        {
-            return;
-        }
-        Transform[] childrens = parent.GetComponentsInChildren<Transform>();
-        logger.Log(Level.DEBUG, "ClearParts:" + childrens.Length);
-        for (int i = 0; i < childrens.Length; i++)
-        {
-            if (i > 0 && childrens[i] != null)
-            {
-                Destroy(childrens[i].gameObject);
-            }
-        }
-    }
+
     public static void DestroyOne(RoadEntryInstance entry)
     {
         //hash[entry.prefab_fname] = null;

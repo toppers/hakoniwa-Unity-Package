@@ -5,17 +5,16 @@ using UnityEngine;
 
 public class EventButton : MonoBehaviour
 {
-    private RoadCreateUserOperation m_handler;
-
+    private RoadCreateUserOperation user_operation;
     void Start()
     {
         RoadEntryComposer.Initialize();
         RoadEntryComposer.InitForExternalComponent();
 
         var root = GameObject.Find("Roads");
-        this.m_handler = root.GetComponentInChildren<RoadCreateUserOperation>();
+        this.user_operation = root.GetComponentInChildren<RoadCreateUserOperation>();
 
-        Debug.Log("m_handler=" + this.m_handler);
+        Debug.Log("m_handler=" + this.user_operation);
 
     }
     public void OnCreateButtonClick()
@@ -24,8 +23,6 @@ public class EventButton : MonoBehaviour
     }
     public void OnClearButtonClick()
     {
-
-        RoadEntryComposer.Initialize();
-        RoadEntryComposer.ClearParts();
+        user_operation.DestroyAll();
     }
 }
