@@ -76,6 +76,8 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3_TB3
 			ros.RegisterPublisher<Ev3PduSensorMsg>("ev3_sensor");
             ros.Subscribe<Ev3PduActuatorMsg>("ev3_actuator", Ev3PduActuatorMsgChange);
 			ros.RegisterPublisher<LaserScanMsg>("scan");
+			ros.RegisterPublisher<CompressedImageMsg>("image/compressed");
+			ros.RegisterPublisher<CameraInfoMsg>("camera_info");
 			ros.RegisterPublisher<ImuMsg>("imu");
 			ros.RegisterPublisher<OdometryMsg>("odom");
 			ros.RegisterPublisher<TFMessageMsg>("tf");

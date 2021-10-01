@@ -12,6 +12,7 @@ using Hakoniwa.PluggableAsset.Communication.Pdu;
 using Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot.TB3;
 using Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot;
 using Hakoniwa.Core.Utils;
+using Hakoniwa.PluggableAsset.Communication.Pdu.Accessor;
 
 namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
@@ -23,12 +24,15 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private string my_name;
         private PduIoConnector pdu_io;
         private IPduWriter pdu_laser_scan;
+        private IPduWriter pdu_camera;
         private IPduWriter pdu_imu;
         private IPduWriter pdu_odometry;
+        private OdometryAccessor pdu_odometry_accessor;
         private IPduWriter pdu_tf;
         private IPduWriter pdu_joint_state;
         private IPduReader pdu_motor_control;
         private ILaserScan laser_scan;
+        private ICameraSensor camera;
         private IMUSensor imu;
         private MotorController motor_controller;
         private int tf_num = 1;
@@ -42,6 +46,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             //LaserSensor
             this.laser_scan.UpdateSensorValues();
             this.laser_scan.UpdateSensorData(pdu_laser_scan.GetWriteOps().Ref(null));
+
+            //CameraSensor
+            this.camera.UpdateSensorValues();
+            this.camera.UpdateSensorData(pdu_camera.GetWriteOps().Ref(null));
 
             //IMUSensor
             this.imu.UpdateSensorValues();
@@ -242,6 +250,14 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
                 laser_scan = obj.GetComponentInChildren<ILaserScan>();
                 laser_scan.Initialize(obj);
             }
+            subParts = this.parts.GetCamera();
+            if (subParts != null)
+            {
+                obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
+                Debug.Log("path=" + this.transform.name + "/" + subParts);
+                camera = obj.GetComponentInChildren<ICameraSensor>();
+                camera.Initialize(obj);
+            }
             subParts = this.parts.GetIMU();
             if (subParts != null)
             {
@@ -254,6 +270,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             if (this.pdu_laser_scan == null)
             {
                 throw new ArgumentException("can not found LaserScan pdu:" + this.GetName() + "_scanPdu");
+            }
+            this.pdu_camera = this.pdu_io.GetWriter(this.GetName() + "_image" + "/" + "compressedPdu");
+            if (this.pdu_camera == null)
+            {
+                throw new ArgumentException("can not found image pdu:" + this.GetName() + "_image" + "/" + "compressedPdu");
             }
             this.pdu_imu = this.pdu_io.GetWriter(this.GetName() + "_imuPdu");
             if (this.pdu_imu == null)
