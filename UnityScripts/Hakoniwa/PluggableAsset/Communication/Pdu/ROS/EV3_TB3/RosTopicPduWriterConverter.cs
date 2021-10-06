@@ -104,6 +104,16 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.EV3_TB3
 			dst.velocity = src.GetDataFloat64Array("velocity");
 			dst.effort = src.GetDataFloat64Array("effort");
         }
+        static private void ConvertToMessage(IPduReadOperation src, ImageMsg dst)
+        {
+            ConvertToMessage(src.Ref("header").GetPduReadOps(), dst.header);
+			dst.height = src.GetDataUInt32("height");
+			dst.width = src.GetDataUInt32("width");
+			dst.encoding = src.GetDataString("encoding");
+			dst.is_bigendian = src.GetDataUInt8("is_bigendian");
+			dst.step = src.GetDataUInt32("step");
+			dst.data = src.GetDataUInt8Array("data");
+        }
         static private void ConvertToMessage(IPduReadOperation src, Ev3PduSensorHeaderMsg dst)
         {
 			dst.name = src.GetDataString("name");
@@ -275,6 +285,12 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.EV3_TB3
             if (type.Equals("sensor_msgs/LaserScan"))
             {
             	LaserScanMsg ros_topic = new LaserScanMsg();
+                ConvertToMessage(src, ros_topic);
+                return ros_topic;
+            }
+            if (type.Equals("sensor_msgs/Image"))
+            {
+            	ImageMsg ros_topic = new ImageMsg();
                 ConvertToMessage(src, ros_topic);
                 return ros_topic;
             }

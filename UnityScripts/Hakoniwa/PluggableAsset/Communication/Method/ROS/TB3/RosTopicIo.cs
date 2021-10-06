@@ -73,7 +73,9 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
 
 
 			ros.RegisterPublisher<LaserScanMsg>("scan");
-			ros.RegisterPublisher<CompressedImageMsg>("camera");
+			ros.RegisterPublisher<ImageMsg>("image");
+			ros.RegisterPublisher<CompressedImageMsg>("image/compressed");
+			ros.RegisterPublisher<CameraInfoMsg>("camera_info");
 			ros.RegisterPublisher<ImuMsg>("imu");
 			ros.RegisterPublisher<OdometryMsg>("odom");
 			ros.RegisterPublisher<TFMessageMsg>("tf");
