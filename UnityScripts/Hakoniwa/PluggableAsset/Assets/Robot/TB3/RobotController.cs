@@ -24,6 +24,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private string my_name;
         private PduIoConnector pdu_io;
         private IPduWriter pdu_laser_scan;
+        private IPduWriter pdu_camera_info;
         private IPduWriter pdu_raw_camera;
         private IPduWriter pdu_compressed_camera;
         private IPduWriter pdu_imu;
@@ -54,6 +55,9 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             this.raw_camera.UpdateSensorData(pdu_raw_camera.GetWriteOps().Ref(null));
             this.compressed_camera.UpdateSensorData(pdu_compressed_camera.GetWriteOps().Ref(null));
 
+            //CameraInfo
+            this.PublishCameraInfo();
+
             //IMUSensor
             this.imu.UpdateSensorValues();
             this.imu.UpdateSensorData(pdu_imu.GetWriteOps().Ref(null));
@@ -69,6 +73,27 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 
             //joint states
             this.PublishJointStates();
+        }
+
+        private void PublishCameraInfo()
+        {
+            double[] _D = new double[5] {0.0, 0.0, 0.0, 0.0, 0.0};
+            double[] _K = new double[9] {570.3422241210938, 0.0, 319.5, 0.0, 570.3422241210938, 239.5, 0.0, 0.0, 1.0};
+            double[] _R = new double[9] {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+            double[] _P = new double[12] {570.3422241210938, 0.0, 319.5, 0.0, 0.0, 570.3422241210938, 239.5, 0.0, 0.0, 0.0, 1.0, 0.0};
+            //PDU
+            //header
+            TimeStamp.Set(this.pdu_camera_info.GetWriteOps().Ref(null));
+            this.pdu_camera_info.GetWriteOps().Ref("header").SetData("frame_id", "camera_link");
+            this.pdu_camera_info.GetWriteOps().SetData("height", (System.UInt32)480);
+            this.pdu_camera_info.GetWriteOps().SetData("width", (System.UInt32)640);
+            this.pdu_camera_info.GetWriteOps().SetData("distortion_model", "plumb_bob");
+            this.pdu_camera_info.GetWriteOps().SetData("d", _D);
+            this.pdu_camera_info.GetWriteOps().SetData("k", _K);
+            this.pdu_camera_info.GetWriteOps().SetData("r", _R);
+            this.pdu_camera_info.GetWriteOps().SetData("p", _P);
+            this.pdu_camera_info.GetWriteOps().SetData("binning_x", (System.UInt32)0);
+            this.pdu_camera_info.GetWriteOps().SetData("binning_y", (System.UInt32)0);
         }
 
         private void PublishJointStates()
@@ -281,6 +306,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             if (this.pdu_laser_scan == null)
             {
                 throw new ArgumentException("can not found LaserScan pdu:" + this.GetName() + "_scanPdu");
+            }
+            this.pdu_camera_info = this.pdu_io.GetWriter(this.GetName() + "_camera_infoPdu");
+            if (this.pdu_camera_info == null)
+            {
+                throw new ArgumentException("can not found camera_info pdu:" + this.GetName() + "_camera_infoPdu");
             }
             this.pdu_raw_camera = this.pdu_io.GetWriter(this.GetName() + "_imagePdu");
             if (this.pdu_raw_camera == null)

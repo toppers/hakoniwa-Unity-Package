@@ -21,7 +21,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private Texture2D tex;
         private byte[] raw_bytes;
         private byte[] jpg_bytes;
-        private string frame_id = "camera";
+        private string frame_id = "camera_link";
 
         public void Initialize(object root)
         {
