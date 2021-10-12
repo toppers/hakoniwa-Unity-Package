@@ -14,7 +14,6 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private GameObject sensor;
         public RenderTexture RenderTextureRef;
         //public string saveFilePath = "./SavedScreen.jpeg";
-        private GameObject obj = null;
         private Texture2D tex;
         private byte[] bytes;
 

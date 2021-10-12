@@ -32,7 +32,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private IPduWriter pdu_joint_state;
         private IPduReader pdu_motor_control;
         private ILaserScan laser_scan;
-        private ICameraSensor camera;
+        private ICameraSensor sensor_camera;
         private IMUSensor imu;
         private MotorController motor_controller;
         private int tf_num = 1;
@@ -48,8 +48,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             this.laser_scan.UpdateSensorData(pdu_laser_scan.GetWriteOps().Ref(null));
 
             //CameraSensor
-            this.camera.UpdateSensorValues();
-            this.camera.UpdateSensorData(pdu_camera.GetWriteOps().Ref(null));
+            this.sensor_camera.UpdateSensorValues();
+            this.sensor_camera.UpdateSensorData(pdu_camera.GetWriteOps().Ref(null));
 
             //IMUSensor
             this.imu.UpdateSensorValues();
@@ -255,8 +255,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             {
                 obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
                 Debug.Log("path=" + this.transform.name + "/" + subParts);
-                camera = obj.GetComponentInChildren<ICameraSensor>();
-                camera.Initialize(obj);
+                sensor_camera = obj.GetComponentInChildren<ICameraSensor>();
+                sensor_camera.Initialize(obj);
             }
             subParts = this.parts.GetIMU();
             if (subParts != null)
@@ -271,7 +271,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             {
                 throw new ArgumentException("can not found LaserScan pdu:" + this.GetName() + "_scanPdu");
             }
-            this.pdu_camera = this.pdu_io.GetWriter(this.GetName() + "_cameraPdu");
+            this.pdu_camera = this.pdu_io.GetWriter(this.GetName() + "_camera/imagePdu");
             if (this.pdu_camera == null)
             {
                 throw new ArgumentException("can not found Camera pdu:" + this.GetName() + "_cameraPdu");

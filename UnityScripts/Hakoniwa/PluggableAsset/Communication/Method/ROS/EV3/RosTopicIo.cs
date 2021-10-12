@@ -27,14 +27,25 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3
         public int network_timeout;
         public float sleep_time;
     }
+    public class TopicCycle
+    {
+        public int count;
+        public int cycle;
+        public TopicCycle(int c)
+        {
+            this.count = 0;
+            this.cycle = c;
+        }
+    }
     public class RosTopicIo : IRosTopicIo
     {
         private ROSConnection ros;
         private Dictionary<string, Message> topic_data_table = new Dictionary<string, Message>();
+        private Dictionary<string, TopicCycle> topic_send_timing = new Dictionary<string, TopicCycle>();
         private UnityRosParameter parameters;
         private void LoadParameters(string filepath)
         {
-            ros = ROSConnection.instance;
+            ros = ROSConnection.GetOrCreateInstance();
             if (filepath == null)
             {
                 return;
@@ -56,7 +67,23 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3
             SimpleLogger.Get().Log(Level.INFO, "NetworkTimeoutSeconds=" + ros.NetworkTimeoutSeconds);
             SimpleLogger.Get().Log(Level.INFO, "SleepTimeSeconds=" + ros.SleepTimeSeconds);
         }
-
+        private RostopicPublisherOption GetPubOption(string topic_name)
+        {
+            foreach (var e in AssetConfigLoader.core_config.ros_topics)
+            {
+                if (e.topic_message_name == topic_name)
+                {
+                    if (e.sub == false)
+                    {
+                        if (e.pub_option != null)
+                        {
+                            return e.pub_option;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
         public RosTopicIo()
         {
             LoadParameters(AssetConfigLoader.core_config.ros_topic_method.parameters);
@@ -64,10 +91,27 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3
             foreach (var e in AssetConfigLoader.core_config.ros_topics)
             {
                 topic_data_table[e.topic_message_name] = null;
+                if (e.sub == false)
+                {
+                    if (e.pub_option != null)
+                    {
+                        topic_send_timing[e.topic_message_name] = new TopicCycle(e.pub_option.cycle_scale);
+                    }
+                    else
+                    {
+                        topic_send_timing[e.topic_message_name] = new TopicCycle(1);
+                    }
+                }
             }
+			RostopicPublisherOption option = null;
 
-
-			ros.RegisterPublisher<Ev3PduSensorMsg>("ev3_sensor");
+			option = GetPubOption("ev3_sensor");
+			if (option != null) {
+				ros.RegisterPublisher<Ev3PduSensorMsg>("ev3_sensor", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<Ev3PduSensorMsg>("ev3_sensor");
+			}
             ros.Subscribe<Ev3PduActuatorMsg>("ev3_actuator", Ev3PduActuatorMsgChange);
 
         }
@@ -81,7 +125,12 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3
         public void Publish(IPduCommTypedData data)
         {
             RosTopicPduCommTypedData typed_data = data as RosTopicPduCommTypedData;
-            ros.Send(typed_data.GetDataName(), typed_data.GetTopicData());
+            topic_send_timing[typed_data.GetDataName()].count++;
+            if (topic_send_timing[typed_data.GetDataName()].count >= topic_send_timing[typed_data.GetDataName()].cycle)
+            {
+                ros.Publish(typed_data.GetDataName(), typed_data.GetTopicData());
+                topic_send_timing[typed_data.GetDataName()].count = 0;
+            }
         }
         
         private void Reset()

@@ -32,14 +32,25 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
         public int network_timeout;
         public float sleep_time;
     }
+    public class TopicCycle
+    {
+        public int count;
+        public int cycle;
+        public TopicCycle(int c)
+        {
+            this.count = 0;
+            this.cycle = c;
+        }
+    }
     public class RosTopicIo : IRosTopicIo
     {
         private ROSConnection ros;
         private Dictionary<string, Message> topic_data_table = new Dictionary<string, Message>();
+        private Dictionary<string, TopicCycle> topic_send_timing = new Dictionary<string, TopicCycle>();
         private UnityRosParameter parameters;
         private void LoadParameters(string filepath)
         {
-            ros = ROSConnection.instance;
+            ros = ROSConnection.GetOrCreateInstance();
             if (filepath == null)
             {
                 return;
@@ -61,7 +72,23 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
             SimpleLogger.Get().Log(Level.INFO, "NetworkTimeoutSeconds=" + ros.NetworkTimeoutSeconds);
             SimpleLogger.Get().Log(Level.INFO, "SleepTimeSeconds=" + ros.SleepTimeSeconds);
         }
-
+        private RostopicPublisherOption GetPubOption(string topic_name)
+        {
+            foreach (var e in AssetConfigLoader.core_config.ros_topics)
+            {
+                if (e.topic_message_name == topic_name)
+                {
+                    if (e.sub == false)
+                    {
+                        if (e.pub_option != null)
+                        {
+                            return e.pub_option;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
         public RosTopicIo()
         {
             LoadParameters(AssetConfigLoader.core_config.ros_topic_method.parameters);
@@ -69,15 +96,62 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
             foreach (var e in AssetConfigLoader.core_config.ros_topics)
             {
                 topic_data_table[e.topic_message_name] = null;
+                if (e.sub == false)
+                {
+                    if (e.pub_option != null)
+                    {
+                        topic_send_timing[e.topic_message_name] = new TopicCycle(e.pub_option.cycle_scale);
+                    }
+                    else
+                    {
+                        topic_send_timing[e.topic_message_name] = new TopicCycle(1);
+                    }
+                }
             }
+			RostopicPublisherOption option = null;
 
-
-			ros.RegisterPublisher<LaserScanMsg>("scan");
-			ros.RegisterPublisher<CompressedImageMsg>("camera");
-			ros.RegisterPublisher<ImuMsg>("imu");
-			ros.RegisterPublisher<OdometryMsg>("odom");
-			ros.RegisterPublisher<TFMessageMsg>("tf");
-			ros.RegisterPublisher<JointStateMsg>("joint_states");
+			option = GetPubOption("scan");
+			if (option != null) {
+				ros.RegisterPublisher<LaserScanMsg>("scan", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<LaserScanMsg>("scan");
+			}
+			option = GetPubOption("camera/image");
+			if (option != null) {
+				ros.RegisterPublisher<CompressedImageMsg>("camera/image", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<CompressedImageMsg>("camera/image");
+			}
+			option = GetPubOption("imu");
+			if (option != null) {
+				ros.RegisterPublisher<ImuMsg>("imu", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<ImuMsg>("imu");
+			}
+			option = GetPubOption("odom");
+			if (option != null) {
+				ros.RegisterPublisher<OdometryMsg>("odom", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<OdometryMsg>("odom");
+			}
+			option = GetPubOption("tf");
+			if (option != null) {
+				ros.RegisterPublisher<TFMessageMsg>("tf", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<TFMessageMsg>("tf");
+			}
+			option = GetPubOption("joint_states");
+			if (option != null) {
+				ros.RegisterPublisher<JointStateMsg>("joint_states", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<JointStateMsg>("joint_states");
+			}
             ros.Subscribe<TwistMsg>("cmd_vel", TwistMsgChange);
 
         }
@@ -91,7 +165,12 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.TB3
         public void Publish(IPduCommTypedData data)
         {
             RosTopicPduCommTypedData typed_data = data as RosTopicPduCommTypedData;
-            ros.Send(typed_data.GetDataName(), typed_data.GetTopicData());
+            topic_send_timing[typed_data.GetDataName()].count++;
+            if (topic_send_timing[typed_data.GetDataName()].count >= topic_send_timing[typed_data.GetDataName()].cycle)
+            {
+                ros.Publish(typed_data.GetDataName(), typed_data.GetTopicData());
+                topic_send_timing[typed_data.GetDataName()].count = 0;
+            }
         }
         
         private void Reset()
