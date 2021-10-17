@@ -76,9 +76,9 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.HackEV
             switch (type)
             {
                 case ButtonSensorType.BUTTON_SENSOR_LEFT:
-                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash06/TouchSensor";
-                case ButtonSensorType.BUTTON_SENSOR_RIGHT:
                     return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash05/TouchSensor";
+                case ButtonSensorType.BUTTON_SENSOR_RIGHT:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash06/TouchSensor";
                 case ButtonSensorType.BUTTON_SENSOR_ENTER:
                     return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_DAsh07/TouchSensor";
                 case ButtonSensorType.BUTTON_SENSOR_DOWN:
