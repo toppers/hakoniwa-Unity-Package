@@ -99,7 +99,8 @@ public class RoadEntryComposer : MonoBehaviour
         //Debug.Log("prefab_fname=" + road_entry.prefab_fname);
         //Debug.Log("prefab_path=" + road_entry.parts_type.prefab_path);
         string path = road_entry.parts_type.prefab_path + "/" + road_entry.prefab_fname;
-        var p = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        //var p = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        var p = Resources.Load<GameObject>(path);
         if (p == null)
         {
             throw new InvalidDataException("ERROR: path is not found:" + path);
@@ -107,8 +108,10 @@ public class RoadEntryComposer : MonoBehaviour
         road_entry.instance = Instantiate(p, road_entry.pos, Quaternion.identity) as GameObject;
 
 
-        string patch_path = "Assets/HakoniwaPatch/" + road_entry.prefab_fname;
-        var patch = AssetDatabase.LoadAssetAtPath<GameObject>(patch_path);
+        //string patch_path = "Assets/HakoniwaPatch/" + road_entry.prefab_fname;
+        //var patch = AssetDatabase.LoadAssetAtPath<GameObject>(patch_path);
+        string patch_path = "HakoniwaPatch/" + road_entry.prefab_fname;
+        var patch = Resources.Load<GameObject>(patch_path);
         if (patch == null)
         {
             throw new InvalidDataException("ERROR: patch path is not found:" + patch_path);

@@ -213,7 +213,7 @@ namespace Hakoniwa.Tools.RoadMap
                 {
                     DestoryObject();
                 }
-
+#if false
                 if (Input.GetKeyDown(KeyCode.B))
                 {
                     if (RoadEntrySelector.GetSelectedIndex() >= 0)
@@ -221,6 +221,7 @@ namespace Hakoniwa.Tools.RoadMap
                         this.lastobj = RoadEntryInstance.GetInstanceFromIndex(RoadEntrySelector.GetSelectedIndex());
                     }
                 }
+#endif
                 if (Input.GetKeyDown(KeyCode.M))
                 {
                     if (RoadEntrySelector.GetSelectedIndex() >= 0)
@@ -234,16 +235,30 @@ namespace Hakoniwa.Tools.RoadMap
                 }
             }
         }
+        private GameObject select_obj = null;
 
         private void DeSelectObject()
         {
-            Selection.objects = new UnityEngine.Object[0];
+            //Selection.objects = new UnityEngine.Object[0];
+            if (this.select_obj != null)
+            {
+                Destroy(this.select_obj);
+            }
         }
         private void SelectObject(GameObject obj)
         {
-            var objs = new UnityEngine.Object[1];
-            objs[0] = obj;
-            Selection.objects = objs;
+            //var objs = new UnityEngine.Object[1];
+            //objs[0] = obj;
+            //Selection.objects = objs;
+            this.DeSelectObject();
+            this.lastobj = RoadEntryInstance.GetInstanceFromIndex(RoadEntrySelector.GetSelectedIndex());
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.localScale = new Vector3(2, 1, 2);
+            var pos = obj.GetComponent<Transform>();
+            cube.transform.position = new Vector3(pos.position.x, pos.position.y+10, pos.position.z);
+            cube.transform.Rotate(0, 45, 0);
+            this.select_obj = cube;
+            cube.GetComponent<Renderer>().material.color = new Color(1, 0, 0);
         }
 
         private void DestoryObject()
@@ -290,7 +305,8 @@ namespace Hakoniwa.Tools.RoadMap
 
         private GameObject CreateParts(string path)
         {
-            var p = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            //var p = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var p = Resources.Load<GameObject>(path);
             if (p == null)
             {
                 throw new InvalidDataException("ERROR: path is not found:" + path);

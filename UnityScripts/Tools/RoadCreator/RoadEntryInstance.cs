@@ -109,7 +109,8 @@ namespace Hakoniwa.Tools.RoadMap
         public RoadEntryInstance(RoadMapEntry entry, RoadPartsEntry e_type)
         {
             this.type = e_type;
-            this.prefab_fname = entry.prefab_name + ".prefab";
+            //this.prefab_fname = entry.prefab_name + ".prefab";
+            this.prefab_fname = entry.prefab_name;
             this.cfg_entry = entry;
             this.pos = new Vector3(0, 0, 0);
             if (e_type.patch_pos != null)
