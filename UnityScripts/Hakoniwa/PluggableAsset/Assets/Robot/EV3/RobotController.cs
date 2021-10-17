@@ -19,6 +19,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
         public int armMotorPower = 100;
         private GameObject root;
         private GameObject myObject;
+        private ButtonSensor button_sensor;
         private IRobotMotor motor_a;
         private IRobotMotor motor_b;
         private IRobotMotor motor_c;
@@ -202,6 +203,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
                 this.pdu_writer.GetWriteOps().SetData("gps_lon", gpsSensor.GetLongitude());
                 this.pdu_writer.GetWriteOps().SetData("gps_lat", gpsSensor.GeLatitude());
             }
+            this.button_sensor.UpdateSensorValues(this.pdu_writer);
         }
 
         private void InitActuator()
@@ -308,6 +310,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
                     gpsSensor.Initialize(obj);
                 }
             }
+            this.button_sensor = new ButtonSensor(root, this.transform.name);
+            this.button_sensor.Initialize(this.parts);
         }
 
 

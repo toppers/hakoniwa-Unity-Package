@@ -69,5 +69,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.HackEV
         {
             return null;
         }
+
+        public string getButtonSensor(ButtonSensorType type)
+        {
+            return null;
+        }
     }
 }

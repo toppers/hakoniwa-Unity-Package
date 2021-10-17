@@ -65,5 +65,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.SimpleRobot
         {
             return null;
         }
+
+        public string getButtonSensor(ButtonSensorType type)
+        {
+            return null;
+        }
     }
 }

@@ -63,5 +63,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.Jeep
         {
             return null;
         }
+
+        public string getButtonSensor(ButtonSensorType type)
+        {
+            return null;
+        }
     }
 }

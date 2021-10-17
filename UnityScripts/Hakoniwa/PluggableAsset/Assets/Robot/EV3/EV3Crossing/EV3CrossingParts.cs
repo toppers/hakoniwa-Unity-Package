@@ -62,6 +62,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3Crossing
         {
             return null;
         }
+
+        public string getButtonSensor(ButtonSensorType type)
+        {
+            return null;
+        }
     }
 
 }
