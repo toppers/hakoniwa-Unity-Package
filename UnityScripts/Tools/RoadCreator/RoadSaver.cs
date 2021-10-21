@@ -12,7 +12,7 @@ namespace Hakoniwa.Tools.RoadMap
     {
         public static void Save()
         {
-            string destPath = "./road_map_saved.json";
+            string destPath = "./road_map.json";
             var map = RoadEntryInstance.CreateRoadMap();
             string jsonstring = JsonConvert.SerializeObject(map, Formatting.Indented);
             if (File.Exists(destPath))

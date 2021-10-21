@@ -97,6 +97,17 @@ namespace Hakoniwa.Tools.RoadMap
             }
             return null;
         }
+        public static RoadEntryInstance GetRelatedInstance(string name)
+        {
+            foreach (var e in instances)
+            {
+                if (e.HasRelation(name))
+                {
+                    return e;
+                }
+            }
+            return null;
+        }
 
         public RoadPartsEntry parts_type;
         public string prefab_fname;
@@ -120,6 +131,16 @@ namespace Hakoniwa.Tools.RoadMap
                 this.pos.z = this.pos.z + e_type.patch_pos.z;
             }
 
+        }
+        public bool HasRelation(string entry_name)
+        {
+            var tmp = this.cfg_entry.connect_direction;
+            if (tmp != null && tmp.Contains("/"))
+            {
+                var tmp1 = tmp.Split('/')[1];
+                return tmp1.Equals(entry_name);
+            }
+            return false;
         }
 
         public static RoadMap CreateRoadMap()

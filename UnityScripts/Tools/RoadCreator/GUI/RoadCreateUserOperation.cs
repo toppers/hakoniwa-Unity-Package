@@ -261,6 +261,19 @@ namespace Hakoniwa.Tools.RoadMap
             cube.GetComponent<Renderer>().material.color = new Color(1, 0, 0);
         }
 
+        private void DestroyOne(RoadEntryInstance e)
+        {
+            RoadEntryInstance.RemoveInstance(e);
+            this.lastobj = RoadEntryInstance.GetLastObj();
+            RoadEntryComposer.DestroyOne(e);
+
+            RoadEntrySelector.DoDeselect();
+            this.DeSelectObject();
+
+            RoadEntrySelector.DoSelectLastObj();
+            this.DoSelect();
+        }
+
         private void DestoryObject()
         {
             if (RoadEntrySelector.GetSelectedIndex() >= 0)
@@ -268,17 +281,24 @@ namespace Hakoniwa.Tools.RoadMap
                 var e = GetSelectedInstance();
                 if (e != null)
                 {
-                    RoadEntryInstance.RemoveInstance(e);
-                    this.lastobj = RoadEntryInstance.GetLastObj();
-                    RoadEntryComposer.DestroyOne(e);
-                    
-                    RoadEntrySelector.DoDeselect();
-                    this.DeSelectObject();
-
-                    RoadEntrySelector.DoSelectLastObj();
-                    this.DoSelect();
+                    DestroyRelatedObjectsRecursive(e);
                 }
             }
+        }
+        private bool DestroyRelatedObjectsRecursive(RoadEntryInstance e)
+        {
+            Debug.Log("destroy:" + e.cfg_entry.name);
+            while (true)
+            {
+                var victim = RoadEntryInstance.GetRelatedInstance(e.cfg_entry.name);
+                if (victim == null)
+                {
+                    break;
+                }
+                DestroyRelatedObjectsRecursive(victim);
+            }
+            DestroyOne(e);
+            return false;
         }
         public void DestroyAll()
         {
@@ -295,11 +315,15 @@ namespace Hakoniwa.Tools.RoadMap
             if (Input.GetKeyDown(KeyCode.R))
             {
                 obj.instance.transform.Rotate(0, 90, 0);
+#if false
                 obj.cfg_entry.rotation += 90.0f;
                 if (obj.cfg_entry.rotation > 360.0f)
                 {
                     obj.cfg_entry.rotation = 0.0f;
                 }
+#else
+                obj.cfg_entry.rotation = obj.instance.transform.rotation.eulerAngles.y;
+#endif
             }
         }
 
