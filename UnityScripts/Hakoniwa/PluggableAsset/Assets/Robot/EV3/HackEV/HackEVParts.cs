@@ -19,6 +19,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.HackEV
         private string led = "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash01";
         private string gps = "RoboModel_Axis";
 
+        public void Load()
+        {
+            return;
+        }
         public string GetMotorA()
         {
             return motor_a;

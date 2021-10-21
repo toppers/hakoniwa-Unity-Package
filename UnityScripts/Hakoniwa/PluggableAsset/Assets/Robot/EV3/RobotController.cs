@@ -46,6 +46,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             this.root = GameObject.Find("Robot");
             this.myObject = GameObject.Find("Robot/" + this.transform.name);
             this.parts = myObject.GetComponentInChildren<IEV3Parts>();
+            this.parts.Load();
             this.my_name = string.Copy(this.transform.name);
             this.InitActuator();
             this.InitSensor();
@@ -212,6 +213,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             string subParts = this.parts.GetMotorA();
             if (subParts != null)
             {
+                Debug.Log("motor_a:" + this.parts.GetMotorA());
                 obj = root.transform.Find(this.transform.name + "/" + this.parts.GetMotorA()).gameObject;
                 this.motor_a = obj.GetComponentInChildren<IRobotMotor>();
                 motor_a.Initialize(obj);
@@ -221,6 +223,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             subParts = this.parts.GetMotorB();
             if (subParts != null)
             {
+                Debug.Log("motor_b:" + this.parts.GetMotorB());
                 obj = root.transform.Find(this.transform.name + "/" + this.parts.GetMotorB()).gameObject;
                 this.motor_b = obj.GetComponentInChildren<IRobotMotor>();
                 motor_b.Initialize(obj);
@@ -230,6 +233,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             subParts = this.parts.GetMotorC();
             if (subParts != null)
             {
+                Debug.Log("motor_c:" + this.parts.GetMotorC());
                 //Debug.Log("parts=" + this.parts.GetMotorC());
                 if (root.transform.Find(this.transform.name + "/" + this.parts.GetMotorC()) != null)
                 {
@@ -258,6 +262,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             string subParts = this.parts.GetColorSensor0();
             if (subParts != null)
             {
+                Debug.Log("color_sensor0:" + this.parts.GetColorSensor0());
                 obj = root.transform.Find(this.transform.name + "/" + this.parts.GetColorSensor0()).gameObject;
                 colorSensor0 = obj.GetComponentInChildren<IRobotColorSensor>();
                 colorSensor0.Initialize(obj);
@@ -265,6 +270,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             subParts = this.parts.GetColorSensor1();
             if (subParts != null)
             {
+                Debug.Log("color_sensor1:" + this.parts.GetColorSensor0());
                 obj = root.transform.Find(this.transform.name + "/" + this.parts.GetColorSensor1()).gameObject;
                 colorSensor1 = obj.GetComponentInChildren<IRobotColorSensor>();
                 colorSensor1.Initialize(obj);
@@ -279,6 +285,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             subParts = this.parts.getTouchSensor0();
             if (subParts != null)
             {
+                Debug.Log("touch_sensor0:" + this.parts.getTouchSensor0());
                 obj = root.transform.Find(this.transform.name + "/" + this.parts.getTouchSensor0()).gameObject;
                 touchSensor0 = obj.GetComponentInChildren<IRobotTouchSensor>();
                 touchSensor0.Initialize(obj);
@@ -286,6 +293,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             subParts = this.parts.getTouchSensor1();
             if (subParts != null)
             {
+                Debug.Log("touch_sensor1:" + this.parts.getTouchSensor1());
                 obj = root.transform.Find(this.transform.name + "/" + this.parts.getTouchSensor1()).gameObject;
                 touchSensor1 = obj.GetComponentInChildren<IRobotTouchSensor>();
                 touchSensor1.Initialize(obj);

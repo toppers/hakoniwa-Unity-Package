@@ -17,6 +17,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.SimpleRobot
         private string gyro_sensor = "Axle/GyroSensor";
         private string motor_arm = "Axle/Arm/ArmMotor";
 
+        public void Load()
+        {
+            return;
+        }
         public string GetColorSensor0()
         {
             return color_sensor0;

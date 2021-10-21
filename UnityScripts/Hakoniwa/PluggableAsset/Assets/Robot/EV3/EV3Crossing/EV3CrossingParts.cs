@@ -9,6 +9,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3Crossing
     {
         private string motor_arm = "EV3GuardHolder";
 
+        public void Load()
+        {
+            return;
+        }
         public string getGyroSensor()
         {
             return null;

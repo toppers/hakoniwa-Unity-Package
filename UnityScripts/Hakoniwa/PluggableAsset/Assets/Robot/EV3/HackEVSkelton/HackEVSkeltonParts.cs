@@ -74,5 +74,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.HackEV
         {
             return null;
         }
+
+        public void Load()
+        {
+            return;
+        }
     }
 }
