@@ -1,4 +1,4 @@
-using Assets.Scripts.Hakoniwa.PluggableAsset;
+using Hakoniwa.PluggableAsset.Assets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

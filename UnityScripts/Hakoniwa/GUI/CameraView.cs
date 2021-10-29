@@ -4,13 +4,13 @@
 public class CameraView : MonoBehaviour
 {
     [SerializeField, Range(0.1f, 10f)]
-    private float wheelSpeed = 1f;
+    private float wheelSpeed = 8f;
 
     [SerializeField, Range(0.1f, 10f)]
-    private float moveSpeed = 0.3f;
+    private float moveSpeed = 8.0f;
 
     [SerializeField, Range(0.1f, 10f)]
-    private float rotateSpeed = 0.3f;
+    private float rotateSpeed = 1.0f;
 
     private Vector3 preMousePos;
 

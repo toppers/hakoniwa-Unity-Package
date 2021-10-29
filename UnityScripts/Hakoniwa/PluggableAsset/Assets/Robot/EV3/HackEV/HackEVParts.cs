@@ -19,6 +19,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.HackEV
         private string led = "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash01";
         private string gps = "RoboModel_Axis";
 
+        public void Load()
+        {
+            return;
+        }
         public string GetMotorA()
         {
             return motor_a;
@@ -69,6 +73,26 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.HackEV
         public string GetColorSensor1()
         {
             return color_sensor1;
+        }
+
+        public string getButtonSensor(ButtonSensorType type)
+        {
+            switch (type)
+            {
+                case ButtonSensorType.BUTTON_SENSOR_LEFT:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash05/TouchSensor";
+                case ButtonSensorType.BUTTON_SENSOR_RIGHT:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash06/TouchSensor";
+                case ButtonSensorType.BUTTON_SENSOR_ENTER:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_DAsh07/TouchSensor";
+                case ButtonSensorType.BUTTON_SENSOR_DOWN:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash08/TouchSensor";
+                case ButtonSensorType.BUTTON_SENSOR_UP:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash09/TouchSensor";
+                case ButtonSensorType.BUTTON_SENSOR_BACK:
+                    return "RoboModel_Axis/Body/EV3_IntelligentBlock/EV3_IntelligentBlock_Root/EV3_IntelligentBlock_Ash04/TouchSensor";
+            }
+            throw new System.NotImplementedException();
         }
     }
 }

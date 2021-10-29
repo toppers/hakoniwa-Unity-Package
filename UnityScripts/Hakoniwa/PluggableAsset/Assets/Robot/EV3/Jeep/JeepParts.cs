@@ -13,6 +13,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.Jeep
         private string color_sensor0 = "Jeep_Axle/LineTraceSensorHolder/ColorSensor";
         private string ultra_sonic_sensor = "Jeep_Axle/UltrasonicSensor";
 
+        public void Load()
+        {
+            return;
+        }
         public string GetColorSensor0()
         {
             return color_sensor0;
@@ -60,6 +64,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.Jeep
             return null;
         }
         public string getGpsSensor()
+        {
+            return null;
+        }
+
+        public string getButtonSensor(ButtonSensorType type)
         {
             return null;
         }
