@@ -25,6 +25,39 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.TB3
             return new RosTopicPduCommTypedData(pdu_writer);
         }
         
+
+        static private void ConvertToMessage(IPduReadOperation src, Vector3Msg dst)
+        {
+			dst.x = src.GetDataFloat64("x");
+			dst.y = src.GetDataFloat64("y");
+			dst.z = src.GetDataFloat64("z");
+        }
+        static private void ConvertToMessage(IPduReadOperation src, PointMsg dst)
+        {
+			dst.x = src.GetDataFloat64("x");
+			dst.y = src.GetDataFloat64("y");
+			dst.z = src.GetDataFloat64("z");
+        }
+        static private void ConvertToMessage(IPduReadOperation src, TwistWithCovarianceMsg dst)
+        {
+            ConvertToMessage(src.Ref("twist").GetPduReadOps(), dst.twist);
+			dst.covariance = src.GetDataFloat64Array("covariance");
+        }
+        static private void ConvertToMessage(IPduReadOperation src, TimeMsg dst)
+        {
+			dst.sec = src.GetDataInt32("sec");
+			dst.nanosec = src.GetDataUInt32("nanosec");
+        }
+        static private void ConvertToMessage(IPduReadOperation src, PoseWithCovarianceMsg dst)
+        {
+            ConvertToMessage(src.Ref("pose").GetPduReadOps(), dst.pose);
+			dst.covariance = src.GetDataFloat64Array("covariance");
+        }
+        static private void ConvertToMessage(IPduReadOperation src, PoseMsg dst)
+        {
+            ConvertToMessage(src.Ref("position").GetPduReadOps(), dst.position);
+            ConvertToMessage(src.Ref("orientation").GetPduReadOps(), dst.orientation);
+        }
         static private void ConvertToMessage(IPduReadOperation src, HeaderMsg dst)
         {
             ConvertToMessage(src.Ref("stamp").GetPduReadOps(), dst.stamp);

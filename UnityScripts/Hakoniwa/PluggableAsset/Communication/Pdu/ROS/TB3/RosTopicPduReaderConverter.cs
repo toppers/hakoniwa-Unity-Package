@@ -26,7 +26,38 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.TB3
         }
         
 
-
+        private void ConvertToPdu(Vector3Msg src, IPduWriteOperation dst)
+        {
+            dst.SetData("x", src.x);
+            dst.SetData("y", src.y);
+            dst.SetData("z", src.z);
+        }
+        private void ConvertToPdu(PointMsg src, IPduWriteOperation dst)
+        {
+            dst.SetData("x", src.x);
+            dst.SetData("y", src.y);
+            dst.SetData("z", src.z);
+        }
+        private void ConvertToPdu(TwistWithCovarianceMsg src, IPduWriteOperation dst)
+        {
+			ConvertToPdu(src.twist, dst.Ref("twist").GetPduWriteOps());
+            dst.SetData("covariance", src.covariance);
+        }
+        private void ConvertToPdu(TimeMsg src, IPduWriteOperation dst)
+        {
+            dst.SetData("sec", src.sec);
+            dst.SetData("nanosec", src.nanosec);
+        }
+        private void ConvertToPdu(PoseWithCovarianceMsg src, IPduWriteOperation dst)
+        {
+			ConvertToPdu(src.pose, dst.Ref("pose").GetPduWriteOps());
+            dst.SetData("covariance", src.covariance);
+        }
+        private void ConvertToPdu(PoseMsg src, IPduWriteOperation dst)
+        {
+			ConvertToPdu(src.position, dst.Ref("position").GetPduWriteOps());
+			ConvertToPdu(src.orientation, dst.Ref("orientation").GetPduWriteOps());
+        }
         private void ConvertToPdu(HeaderMsg src, IPduWriteOperation dst)
         {
 			ConvertToPdu(src.stamp, dst.Ref("stamp").GetPduWriteOps());
