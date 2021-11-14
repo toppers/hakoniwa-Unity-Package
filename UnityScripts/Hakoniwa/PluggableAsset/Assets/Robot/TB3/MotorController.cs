@@ -17,6 +17,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private float motor_interval_distance = 0.160f; // 16cm
         private IPduReader pdu_reader;
         private ParamScale scale;
+        private Dictionary<string, UpdateDeviceCycle> device_update_cycle = new Dictionary<string, UpdateDeviceCycle>();
 
         private float steering_sensitivity = 1.5f;                // 経験値
 
@@ -38,9 +39,14 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 
             for (int i = 0; i < 2; i++)
             {
-                string subParts = parts.GetMotor(i);
+                int update_cycle = 1;
+                string subParts = parts.GetMotor(i, out update_cycle);
                 if (subParts != null)
                 {
+                    string devname_actuator = "motor_actuator" + i.ToString();
+                    string devname_sensor = "motor_sensor" + i.ToString();
+                    this.device_update_cycle[devname_actuator] = new UpdateDeviceCycle(update_cycle);
+                    this.device_update_cycle[devname_sensor] = new UpdateDeviceCycle(update_cycle);
                     obj = root.transform.Find(transform.name + "/" + subParts).gameObject;
                     Debug.Log("path=" + transform.name + "/" + subParts);
                     motors[i] = obj.GetComponentInChildren<Motor>();
@@ -54,14 +60,20 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         {
             for (int i = 0; i < 2; i++)
             {
-                this.motors[i].UpdateSensorValues();
-                var angle = motors[i].GetDegree();
-                this.delta_angle[i] = angle - this.prev_angle[i];
-                this.prev_angle[i] = angle;
+                string devname_sensor = "motor_sensor" + i.ToString();
+                device_update_cycle[devname_sensor].count++;
+                if (device_update_cycle[devname_sensor].count >= device_update_cycle[devname_sensor].cycle)
+                {
+                    this.motors[i].UpdateSensorValues();
+                    var angle = motors[i].GetDegree();
+                    this.delta_angle[i] = angle - this.prev_angle[i];
+                    this.prev_angle[i] = angle;
 
-                this.moving_distance[i] = ((Mathf.Deg2Rad * this.delta_angle[i]) / Mathf.PI) * motors[i].GetRadius();
-                //Debug.Log("d[" + i + "]=" + this.moving_distance[i]);
-                //Debug.Log("delta_angle[" + i + "]=" + this.delta_angle[i]);
+                    this.moving_distance[i] = ((Mathf.Deg2Rad * this.delta_angle[i]) / Mathf.PI) * motors[i].GetRadius();
+                    //Debug.Log("d[" + i + "]=" + this.moving_distance[i]);
+                    //Debug.Log("delta_angle[" + i + "]=" + this.delta_angle[i]);
+                    device_update_cycle[devname_sensor].count = 0;
+                }
             }
         }
         public void DoActuation()
@@ -77,8 +89,24 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             //Debug.Log("target_rotation_angle_rate=" + target_rotation_angle_rate);
             // V_R(右車輪の目標速度) = V(目標速度) + d × ω(目標角速度)
             // V_L(左車輪の目標速度) = V(目標速度) - d × ω(目標角速度)
-            motors[0].SetTargetVelicty((float)(target_velocity + (steering_sensitivity * target_rotation_angle_rate * motor_interval_distance / 2)));
-            motors[1].SetTargetVelicty((float)(target_velocity - (steering_sensitivity * target_rotation_angle_rate * motor_interval_distance / 2)));
+
+            for (int i = 0; i < 2; i++)
+            {
+                string devname_actuator = "motor_actuator" + i.ToString();
+                device_update_cycle[devname_actuator].count++;
+                if (device_update_cycle[devname_actuator].count >= device_update_cycle[devname_actuator].cycle)
+                {
+                    if (i == 0)
+                    {
+                        motors[i].SetTargetVelicty((float)(target_velocity + (steering_sensitivity * target_rotation_angle_rate * motor_interval_distance / 2)));
+                    }
+                    else
+                    {
+                        motors[i].SetTargetVelicty((float)(target_velocity - (steering_sensitivity * target_rotation_angle_rate * motor_interval_distance / 2)));
+                    }
+                    device_update_cycle[devname_actuator].count = 0;
+                }
+            }
         }
 
         internal float GetDeltaMovingDistance()

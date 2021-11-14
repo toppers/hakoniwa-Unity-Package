@@ -16,6 +16,16 @@ using Hakoniwa.PluggableAsset.Communication.Pdu.Accessor;
 
 namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
+    public class UpdateDeviceCycle
+    {
+        public int count;
+        public int cycle;
+        public UpdateDeviceCycle(int c)
+        {
+            this.count = 0;
+            this.cycle = c;
+        }
+    }
     public class RobotController : MonoBehaviour, IInsideAssetController
     {
         private GameObject root;
@@ -41,38 +51,53 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private int tf_num = 1;
         private long current_timestamp;
         private ParamScale scale;
+        private Dictionary<string, UpdateDeviceCycle> device_update_cycle = new Dictionary<string, UpdateDeviceCycle>();
 
         public void CopySensingDataToPdu()
         {
             this.current_timestamp = UtilTime.GetUnixTime();
 
             //LaserSensor
-            this.laser_scan.UpdateSensorValues();
-            this.laser_scan.UpdateSensorData(pdu_laser_scan.GetWriteOps().Ref(null));
+            device_update_cycle["scan"].count++;
+            if (device_update_cycle["scan"].count >= device_update_cycle["scan"].cycle)
+            {
+                this.laser_scan.UpdateSensorValues();
+                this.laser_scan.UpdateSensorData(pdu_laser_scan.GetWriteOps().Ref(null));
+                device_update_cycle["scan"].count = 0;
+            }
 
-            //CameraSensor
-            this.compressed_camera.UpdateSensorValues();
-            this.raw_camera.UpdateSensorData(pdu_raw_camera.GetWriteOps().Ref(null));
-            this.compressed_camera.UpdateSensorData(pdu_compressed_camera.GetWriteOps().Ref(null));
+            device_update_cycle["camera"].count++;
+            if (device_update_cycle["camera"].count >= device_update_cycle["camera"].cycle)
+            {
+                //CameraSensor
+                this.compressed_camera.UpdateSensorValues();
+                this.raw_camera.UpdateSensorData(pdu_raw_camera.GetWriteOps().Ref(null));
+                this.compressed_camera.UpdateSensorData(pdu_compressed_camera.GetWriteOps().Ref(null));
 
-            //CameraInfo
-            this.PublishCameraInfo();
+                //CameraInfo
+                this.PublishCameraInfo();
+                device_update_cycle["camera"].count = 0;
+            }
 
-            //IMUSensor
-            this.imu.UpdateSensorValues();
-            this.imu.UpdateSensorData(pdu_imu.GetWriteOps().Ref(null));
+            device_update_cycle["imu"].count++;
+            if (device_update_cycle["imu"].count >= device_update_cycle["imu"].cycle)
+            {
+                //IMUSensor
+                this.imu.UpdateSensorValues();
+                this.imu.UpdateSensorData(pdu_imu.GetWriteOps().Ref(null));
 
-            //Odometry
-            this.CalcOdometry();
+                //Odometry
+                this.CalcOdometry();
+                //Tf
+                this.PublishTf();
+
+                //joint states
+                this.PublishJointStates();
+                device_update_cycle["imu"].count = 0;
+            }
 
             //Motor
             this.motor_controller.CopySensingDataToPdu();
-
-            //Tf
-            this.PublishTf();
-
-            //joint states
-            this.PublishJointStates();
         }
 
         private void PublishCameraInfo()
@@ -260,89 +285,88 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             this.root = GameObject.Find("Robot");
             this.myObject = GameObject.Find("Robot/" + this.transform.name);
             this.parts = myObject.GetComponentInChildren<ITB3Parts>();
+            this.parts.Load();
             this.my_name = string.Copy(this.transform.name);
             this.pdu_io = PduIoConnector.Get(this.GetName());
             this.InitActuator();
             this.InitSensor();
             this.init_pos_unity = this.imu.transform.position;
+
         }
 
         private void InitSensor()
         {
+            int update_cycle = 1;
             GameObject obj;
-            string subParts = this.parts.GetLaserScan();
+            string subParts = this.parts.GetLaserScan(out update_cycle);
             if (subParts != null)
             {
+                this.device_update_cycle["scan"] = new UpdateDeviceCycle(update_cycle);
                 obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
                 Debug.Log("path=" + this.transform.name + "/" + subParts);
                 laser_scan = obj.GetComponentInChildren<ILaserScan>();
                 laser_scan.Initialize(obj);
+                this.pdu_laser_scan = this.pdu_io.GetWriter(this.GetName() + "_scanPdu");
+                if (this.pdu_laser_scan == null)
+                {
+                    throw new ArgumentException("can not found LaserScan pdu:" + this.GetName() + "_scanPdu");
+                }
             }
-            subParts = this.parts.GetCamera();
+            subParts = this.parts.GetCamera(out update_cycle);
             if (subParts != null)
             {
+                this.device_update_cycle["camera"] = new UpdateDeviceCycle(update_cycle);
                 obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
                 Debug.Log("path=" + this.transform.name + "/" + subParts);
                 raw_camera = obj.GetComponentInChildren<ICameraSensor>();
                 raw_camera.Initialize(obj);
-            }
-            subParts = this.parts.GetCamera();
-            if (subParts != null)
-            {
-                obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
-                Debug.Log("path=" + this.transform.name + "/" + subParts);
                 compressed_camera = obj.GetComponentInChildren<ICameraSensor>();
                 compressed_camera.Initialize(obj);
+                this.pdu_camera_info = this.pdu_io.GetWriter(this.GetName() + "_camera_infoPdu");
+                if (this.pdu_camera_info == null)
+                {
+                    throw new ArgumentException("can not found camera_info pdu:" + this.GetName() + "_camera_infoPdu");
+                }
+                this.pdu_raw_camera = this.pdu_io.GetWriter(this.GetName() + "_imagePdu");
+                if (this.pdu_raw_camera == null)
+                {
+                    throw new ArgumentException("can not found image pdu:" + this.GetName() + "_imagePdu");
+                }
+                this.pdu_compressed_camera = this.pdu_io.GetWriter(this.GetName() + "_image" + "/" + "compressedPdu");
+                if (this.pdu_compressed_camera == null)
+                {
+                    throw new ArgumentException("can not found image pdu:" + this.GetName() + "_image" + "/" + "compressedPdu");
+                }
             }
-            subParts = this.parts.GetIMU();
+            subParts = this.parts.GetIMU(out update_cycle);
             if (subParts != null)
             {
+                this.device_update_cycle["imu"] = new UpdateDeviceCycle(update_cycle);
                 obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
                 Debug.Log("path=" + this.transform.name + "/" + subParts);
                 imu = obj.GetComponentInChildren<IMUSensor>();
                 imu.Initialize(obj);
-            }
-            this.pdu_laser_scan = this.pdu_io.GetWriter(this.GetName() + "_scanPdu");
-            if (this.pdu_laser_scan == null)
-            {
-                throw new ArgumentException("can not found LaserScan pdu:" + this.GetName() + "_scanPdu");
-            }
-            this.pdu_camera_info = this.pdu_io.GetWriter(this.GetName() + "_camera_infoPdu");
-            if (this.pdu_camera_info == null)
-            {
-                throw new ArgumentException("can not found camera_info pdu:" + this.GetName() + "_camera_infoPdu");
-            }
-            this.pdu_raw_camera = this.pdu_io.GetWriter(this.GetName() + "_imagePdu");
-            if (this.pdu_raw_camera == null)
-            {
-                throw new ArgumentException("can not found image pdu:" + this.GetName() + "_imagePdu");
-            }
-            this.pdu_compressed_camera = this.pdu_io.GetWriter(this.GetName() + "_image" + "/" + "compressedPdu");
-            if (this.pdu_compressed_camera == null)
-            {
-                throw new ArgumentException("can not found image pdu:" + this.GetName() + "_image" + "/" + "compressedPdu");
-            }
-            this.pdu_imu = this.pdu_io.GetWriter(this.GetName() + "_imuPdu");
-            if (this.pdu_imu == null)
-            {
-                throw new ArgumentException("can not found Imu pdu:" + this.GetName() + "_imuPdu");
-            }
-            this.pdu_odometry = this.pdu_io.GetWriter(this.GetName() + "_odomPdu");
-            if (this.pdu_odometry == null)
-            {
-                throw new ArgumentException("can not found Imu pdu:" + this.GetName() + "_odomPdu");
-            }
-            this.pdu_tf = this.pdu_io.GetWriter(this.GetName() + "_tfPdu");
-            if (this.pdu_tf == null)
-            {
-                throw new ArgumentException("can not found Tf pdu:" + this.GetName() + "_tfPdu");
-            }
-            this.pdu_tf.GetWriteOps().InitializePduArray("transforms", tf_num);
-
-            this.pdu_joint_state = this.pdu_io.GetWriter(this.GetName() + "_joint_statesPdu");
-            if (this.pdu_joint_state == null)
-            {
-                throw new ArgumentException("can not found joint_states pdu:" + this.GetName() + "_joint_statesPdu");
+                this.pdu_imu = this.pdu_io.GetWriter(this.GetName() + "_imuPdu");
+                if (this.pdu_imu == null)
+                {
+                    throw new ArgumentException("can not found Imu pdu:" + this.GetName() + "_imuPdu");
+                }
+                this.pdu_odometry = this.pdu_io.GetWriter(this.GetName() + "_odomPdu");
+                if (this.pdu_odometry == null)
+                {
+                    throw new ArgumentException("can not found Imu pdu:" + this.GetName() + "_odomPdu");
+                }
+                this.pdu_tf = this.pdu_io.GetWriter(this.GetName() + "_tfPdu");
+                if (this.pdu_tf == null)
+                {
+                    throw new ArgumentException("can not found Tf pdu:" + this.GetName() + "_tfPdu");
+                }
+                this.pdu_tf.GetWriteOps().InitializePduArray("transforms", tf_num);
+                this.pdu_joint_state = this.pdu_io.GetWriter(this.GetName() + "_joint_statesPdu");
+                if (this.pdu_joint_state == null)
+                {
+                    throw new ArgumentException("can not found joint_states pdu:" + this.GetName() + "_joint_statesPdu");
+                }
             }
             //this.pdu_joint_state.GetWriteOps().Ref("header").SetData("frame_id", "/base_link");
             this.pdu_joint_state.GetWriteOps().Ref("header").SetData("frame_id", "");
