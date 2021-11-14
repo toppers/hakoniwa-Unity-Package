@@ -126,12 +126,26 @@ namespace Hakoniwa.PluggableAsset.Communication.Method.ROS.EV3_TB3
 			else {
 				ros.RegisterPublisher<LaserScanMsg>("scan");
 			}
-			option = GetPubOption("camera/image");
+			option = GetPubOption("image");
 			if (option != null) {
-				ros.RegisterPublisher<CompressedImageMsg>("camera/image", option.queue_size, option.latch);
+				ros.RegisterPublisher<ImageMsg>("image", option.queue_size, option.latch);
 			}
 			else {
-				ros.RegisterPublisher<CompressedImageMsg>("camera/image");
+				ros.RegisterPublisher<ImageMsg>("image");
+			}
+			option = GetPubOption("image/compressed");
+			if (option != null) {
+				ros.RegisterPublisher<CompressedImageMsg>("image/compressed", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<CompressedImageMsg>("image/compressed");
+			}
+			option = GetPubOption("camera_info");
+			if (option != null) {
+				ros.RegisterPublisher<CameraInfoMsg>("camera_info", option.queue_size, option.latch);
+			}
+			else {
+				ros.RegisterPublisher<CameraInfoMsg>("camera_info");
 			}
 			option = GetPubOption("imu");
 			if (option != null) {
