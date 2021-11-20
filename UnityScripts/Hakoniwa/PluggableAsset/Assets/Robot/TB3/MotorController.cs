@@ -9,7 +9,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
     public class MotorController
     {
-        private Motor[] motors = new Motor[2];      // 0: R, 1: L
+        private IRobotMotor[] motors = new IRobotMotor[2];      // 0: R, 1: L
+        private IRobotMotorSensor[] motor_sensors = new IRobotMotorSensor[2];      // 0: R, 1: L
         private float[] prev_angle = new float[2];  // 0: R, 1: L
         private float[] delta_angle = new float[2];  // 0: R, 1: L
         private float[] moving_distance = new float[2];  // 0: R, 1: L
@@ -21,13 +22,13 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 
         private float steering_sensitivity = 1.5f;                // 経験値
 
-        internal Motor GetRightMotor()
+        internal IRobotMotorSensor GetRightMotor()
         {
-            return motors[0];
+            return motor_sensors[0];
         }
-        internal Motor GetLeftMotor()
+        internal IRobotMotorSensor GetLeftMotor()
         {
-            return motors[1];
+            return motor_sensors[1];
         }
 
         public void Initialize(GameObject root, Transform transform, ITB3Parts parts, IPduReader pdu_reader)
@@ -49,7 +50,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
                     this.device_update_cycle[devname_sensor] = new UpdateDeviceCycle(update_cycle);
                     obj = root.transform.Find(transform.name + "/" + subParts).gameObject;
                     Debug.Log("path=" + transform.name + "/" + subParts);
-                    motors[i] = obj.GetComponentInChildren<Motor>();
+                    motor_sensors[i] = obj.GetComponentInChildren<IRobotMotorSensor>();
+                    motors[i] = obj.GetComponentInChildren<IRobotMotor>();
                     motors[i].Initialize(obj);
                     motors[i].SetForce(this.motor_power);
                 }
@@ -64,12 +66,12 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
                 device_update_cycle[devname_sensor].count++;
                 if (device_update_cycle[devname_sensor].count >= device_update_cycle[devname_sensor].cycle)
                 {
-                    this.motors[i].UpdateSensorValues();
-                    var angle = motors[i].GetDegree();
+                    this.motor_sensors[i].UpdateSensorValues();
+                    var angle = motor_sensors[i].GetDegree();
                     this.delta_angle[i] = angle - this.prev_angle[i];
                     this.prev_angle[i] = angle;
 
-                    this.moving_distance[i] = ((Mathf.Deg2Rad * this.delta_angle[i]) / Mathf.PI) * motors[i].GetRadius();
+                    this.moving_distance[i] = ((Mathf.Deg2Rad * this.delta_angle[i]) / Mathf.PI) * motor_sensors[i].GetRadius();
                     //Debug.Log("d[" + i + "]=" + this.moving_distance[i]);
                     //Debug.Log("delta_angle[" + i + "]=" + this.delta_angle[i]);
                     device_update_cycle[devname_sensor].count = 0;

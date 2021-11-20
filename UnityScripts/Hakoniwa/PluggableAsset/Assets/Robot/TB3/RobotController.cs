@@ -46,7 +46,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private ILaserScan laser_scan;
         private ICameraSensor raw_camera;
         private ICameraSensor compressed_camera;
-        private IMUSensor imu;
+        private IIMUSensor imu;
         private MotorController motor_controller;
         private int tf_num = 1;
         private long current_timestamp;
@@ -201,8 +201,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         private Vector3 current_pos_unity = Vector3.zero;
         private void CalcOdometry()
         {
-
-            this.current_pos_unity = this.imu.transform.position;
+            IRobotVector3 pos = this.imu.GetPosition();
+            this.current_pos_unity = new Vector3(pos.x, pos.y, pos.z);
             Vector3 delta_pos_unity = this.current_pos_unity - this.prev_pos_unity;
             Vector3 delta_pos = Vector3.zero;
             
@@ -290,7 +290,8 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             this.pdu_io = PduIoConnector.Get(this.GetName());
             this.InitActuator();
             this.InitSensor();
-            this.init_pos_unity = this.imu.transform.position;
+            IRobotVector3 pos = this.imu.GetPosition();
+            this.init_pos_unity = new Vector3(pos.x, pos.y, pos.z);
 
         }
 
@@ -344,7 +345,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
                 this.device_update_cycle["imu"] = new UpdateDeviceCycle(update_cycle);
                 obj = root.transform.Find(this.transform.name + "/" + subParts).gameObject;
                 Debug.Log("path=" + this.transform.name + "/" + subParts);
-                imu = obj.GetComponentInChildren<IMUSensor>();
+                imu = obj.GetComponentInChildren<IIMUSensor>();
                 imu.Initialize(obj);
                 this.pdu_imu = this.pdu_io.GetWriter(this.GetName() + "_imuPdu");
                 if (this.pdu_imu == null)

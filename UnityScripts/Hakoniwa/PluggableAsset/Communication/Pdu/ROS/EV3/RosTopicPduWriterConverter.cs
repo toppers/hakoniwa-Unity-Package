@@ -21,6 +21,24 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.EV3
         }
         
 
+        static private void ConvertToMessage(IPduReadOperation src, Ev3PduActuatorMsg dst)
+        {
+            ConvertToMessage(src.Ref("head").GetPduReadOps(), dst.head);
+			dst.leds = src.GetDataUInt8Array("leds");
+            if (dst.motors.Length < src.Refs("motors").Length)
+            {
+                dst.motors = new Ev3PduMotorMsg[src.Refs("motors").Length];
+            }
+            foreach (var e in src.Refs("motors"))
+            {
+                int index = Array.IndexOf(src.Refs("motors"), e);
+                if (dst.motors[index] == null) {
+                    dst.motors[index] = new Ev3PduMotorMsg();
+                }
+                ConvertToMessage(e.GetPduReadOps(), dst.motors[index]);
+            }
+			dst.gyro_reset = src.GetDataUInt32("gyro_reset");
+        }
         static private void ConvertToMessage(IPduReadOperation src, Ev3PduActuatorHeaderMsg dst)
         {
 			dst.name = src.GetDataString("name");
@@ -29,13 +47,13 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.EV3
 			dst.ext_off = src.GetDataUInt32("ext_off");
 			dst.ext_size = src.GetDataUInt32("ext_size");
         }
-        static private void ConvertToMessage(IPduReadOperation src, Ev3PduSensorHeaderMsg dst)
+        static private void ConvertToMessage(IPduReadOperation src, Ev3PduColorSensorMsg dst)
         {
-			dst.name = src.GetDataString("name");
-			dst.version = src.GetDataUInt32("version");
-			dst.hakoniwa_time = src.GetDataInt64("hakoniwa_time");
-			dst.ext_off = src.GetDataUInt32("ext_off");
-			dst.ext_size = src.GetDataUInt32("ext_size");
+			dst.color = src.GetDataUInt32("color");
+			dst.reflect = src.GetDataUInt32("reflect");
+			dst.rgb_r = src.GetDataUInt32("rgb_r");
+			dst.rgb_g = src.GetDataUInt32("rgb_g");
+			dst.rgb_b = src.GetDataUInt32("rgb_b");
         }
         static private void ConvertToMessage(IPduReadOperation src, Ev3PduMotorMsg dst)
         {
@@ -78,35 +96,17 @@ namespace Hakoniwa.PluggableAsset.Communication.Pdu.ROS.EV3
 			dst.gps_lat = src.GetDataFloat64("gps_lat");
 			dst.gps_lon = src.GetDataFloat64("gps_lon");
         }
-        static private void ConvertToMessage(IPduReadOperation src, Ev3PduColorSensorMsg dst)
+        static private void ConvertToMessage(IPduReadOperation src, Ev3PduSensorHeaderMsg dst)
         {
-			dst.color = src.GetDataUInt32("color");
-			dst.reflect = src.GetDataUInt32("reflect");
-			dst.rgb_r = src.GetDataUInt32("rgb_r");
-			dst.rgb_g = src.GetDataUInt32("rgb_g");
-			dst.rgb_b = src.GetDataUInt32("rgb_b");
+			dst.name = src.GetDataString("name");
+			dst.version = src.GetDataUInt32("version");
+			dst.hakoniwa_time = src.GetDataInt64("hakoniwa_time");
+			dst.ext_off = src.GetDataUInt32("ext_off");
+			dst.ext_size = src.GetDataUInt32("ext_size");
         }
         static private void ConvertToMessage(IPduReadOperation src, Ev3PduTouchSensorMsg dst)
         {
 			dst.value = src.GetDataUInt32("value");
-        }
-        static private void ConvertToMessage(IPduReadOperation src, Ev3PduActuatorMsg dst)
-        {
-            ConvertToMessage(src.Ref("head").GetPduReadOps(), dst.head);
-			dst.leds = src.GetDataUInt8Array("leds");
-            if (dst.motors.Length < src.Refs("motors").Length)
-            {
-                dst.motors = new Ev3PduMotorMsg[src.Refs("motors").Length];
-            }
-            foreach (var e in src.Refs("motors"))
-            {
-                int index = Array.IndexOf(src.Refs("motors"), e);
-                if (dst.motors[index] == null) {
-                    dst.motors[index] = new Ev3PduMotorMsg();
-                }
-                ConvertToMessage(e.GetPduReadOps(), dst.motors[index]);
-            }
-			dst.gyro_reset = src.GetDataUInt32("gyro_reset");
         }
         
         

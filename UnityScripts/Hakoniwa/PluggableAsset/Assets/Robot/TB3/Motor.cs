@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
-    public class Motor : MonoBehaviour
+    public class Motor : MonoBehaviour, IRobotMotor, IRobotMotorSensor
     {
         private float power_const = 500;
         private float rotation_angle_rate = 0.0f;
@@ -154,6 +154,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         public Vector3 GetDeltaEulerAngle()
         {
             return diff_angle.eulerAngles;
+        }
+
+        public void SetTargetVelicty(int targetVelocity)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

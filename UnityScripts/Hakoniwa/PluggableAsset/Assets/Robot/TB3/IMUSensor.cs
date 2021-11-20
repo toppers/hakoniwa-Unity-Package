@@ -91,5 +91,23 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot.TB3
         {
             //TODO
         }
+
+        IRobotVector3 IIMUSensor.GetDeltaEulerAngle()
+        {
+            IRobotVector3 angle = new IRobotVector3();
+            angle.x = this.delta_angle.x;
+            angle.y = this.delta_angle.y;
+            angle.z = this.delta_angle.z;
+            return angle;
+        }
+
+        public IRobotVector3 GetPosition()
+        {
+            IRobotVector3 pos = new IRobotVector3();
+            pos.x = this.transform.position.x;
+            pos.y = this.transform.position.y;
+            pos.x = this.transform.position.z;
+            return pos;
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace Hakoniwa.Core.Simulation.Environment
             event_button = obj.GetComponentInChildren<SimStart>();
         }
         private Rigidbody[] rigidbodies;
+        private ArticulationBody[] articbodies;
         private Vector3[] initial_pos;
         private Quaternion[] initial_angle;
         private bool[] initial_kinematics;
@@ -31,10 +32,11 @@ namespace Hakoniwa.Core.Simulation.Environment
         public void Save()
         {
             this.rigidbodies = GameObject.Find("Hakoniwa").GetComponentsInChildren<Rigidbody>();
-            this.initial_pos = new Vector3[this.rigidbodies.Length];
-            this.initial_angle = new Quaternion[this.rigidbodies.Length];
-            this.initial_kinematics = new bool[this.rigidbodies.Length];
-            this.initial_collitions = new bool[this.rigidbodies.Length];
+            this.articbodies = GameObject.Find("Hakoniwa").GetComponentsInChildren<ArticulationBody>();
+            this.initial_pos = new Vector3[this.rigidbodies.Length + this.articbodies.Length];
+            this.initial_angle = new Quaternion[this.rigidbodies.Length + this.articbodies.Length];
+            this.initial_kinematics = new bool[this.rigidbodies.Length + this.articbodies.Length];
+            this.initial_collitions = new bool[this.rigidbodies.Length + this.articbodies.Length];
             int i = 0;
             foreach (var rigidbody in rigidbodies)
             {
@@ -44,6 +46,15 @@ namespace Hakoniwa.Core.Simulation.Environment
                 this.initial_angle[i] = new Quaternion(angle.x, angle.y, angle.z, angle.w);
                 this.initial_collitions[i] = rigidbody.detectCollisions;
                 this.initial_kinematics[i] = rigidbody.isKinematic;
+                i++;
+            }
+            foreach (var articbody in articbodies)
+            {
+                Vector3 tmp = articbody.transform.position;
+                Quaternion angle = articbody.transform.rotation;
+                this.initial_pos[i] = new Vector3(tmp.x, tmp.y, tmp.z);
+                this.initial_angle[i] = new Quaternion(angle.x, angle.y, angle.z, angle.w);
+                //this.initial_kinematics[i] = articbody.immovable;
                 i++;
             }
         }
@@ -57,6 +68,10 @@ namespace Hakoniwa.Core.Simulation.Environment
                 rigidbody.isKinematic = true;
                 rigidbody.detectCollisions = false;
             }
+            foreach (var articbody in articbodies)
+            {
+                //articbody.immovable = true;
+            }
             int i = 0;
             foreach (var rigidbody in rigidbodies)
             {
@@ -64,11 +79,22 @@ namespace Hakoniwa.Core.Simulation.Environment
                 rigidbody.transform.rotation = this.initial_angle[i];
                 i++;
             }
+            foreach (var articbody in articbodies)
+            {
+                articbody.transform.position = this.initial_pos[i];
+                articbody.transform.rotation = this.initial_angle[i];
+                i++;
+            }
             i = 0;
             foreach (var rigidbody in rigidbodies)
             {
                 rigidbody.isKinematic = this.initial_kinematics[i];
                 rigidbody.detectCollisions = this.initial_collitions[i];
+                i++;
+            }
+            foreach (var articbody in articbodies)
+            {
+                articbody.immovable = this.initial_kinematics[i];
                 i++;
             }
             foreach (Transform child in this.root.transform)
