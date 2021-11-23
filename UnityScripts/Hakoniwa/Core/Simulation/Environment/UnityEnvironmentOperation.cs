@@ -79,10 +79,13 @@ namespace Hakoniwa.Core.Simulation.Environment
                 rigidbody.transform.rotation = this.initial_angle[i];
                 i++;
             }
-            foreach (var articbody in articbodies)
+            foreach (var articulationBody in articbodies)
             {
-                articbody.transform.position = this.initial_pos[i];
-                articbody.transform.rotation = this.initial_angle[i];
+                articulationBody.transform.position = this.initial_pos[i];
+                articulationBody.transform.rotation = this.initial_angle[i];
+                articulationBody.velocity = Vector3.zero;
+                articulationBody.angularVelocity = Vector3.zero;
+                articulationBody.TeleportRoot(this.initial_pos[i], this.initial_angle[i]);
                 i++;
             }
             i = 0;
