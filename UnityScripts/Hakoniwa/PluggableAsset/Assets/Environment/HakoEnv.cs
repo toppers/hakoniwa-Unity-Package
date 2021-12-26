@@ -15,15 +15,15 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Environment
     {
         private GameObject root;
         private IHakoEnvObstacle[] obstacles;
+        private IHakoEnvCamera[] cameras;
         private IPduWriter pdu_obstacles;
+        private IPduWriter[] pdu_cameras;
         private PduIoConnector pdu_io;
         private string my_name = "HakoEnv";
         private bool[] is_touch;
 
-        public void Initialize()
+        private void InitializeObstacleMonitors()
         {
-            this.root = GameObject.Find("HakoEnv");
-            Debug.Log("HakoEnv Enter");
             var tmp = this.root.GetComponentsInChildren<IHakoEnvObstacle>();
             obstacles = new IHakoEnvObstacle[tmp.Length];
             int i = 0;
@@ -33,17 +33,42 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Environment
                 Debug.Log("Obstacle:" + e);
                 i++;
             }
-            this.pdu_io = PduIoConnector.Get(my_name);
-
             this.pdu_obstacles = this.pdu_io.GetWriter(my_name + "_obstaclesPdu");
             if (this.pdu_obstacles == null)
             {
                 throw new ArgumentException("can not found HakoEnv pdu:" + my_name + "_obstaclesPdu");
             }
             this.is_touch = new bool[tmp.Length];
-            this.CopySensingDataToPdu();
+            this.UpdateObstacleSensorValues();
         }
-        public void CopySensingDataToPdu()
+        private void InitializeCameras()
+        {
+            var tmp = this.root.GetComponentsInChildren<IHakoEnvCamera>();
+            if (tmp == null)
+            {
+                return;
+            }
+            Debug.Log("camera num=" + tmp.Length);
+            cameras = new IHakoEnvCamera[tmp.Length];
+            pdu_cameras = new IPduWriter[tmp.Length];
+
+            int i = 0;
+            foreach (var child in tmp)
+            {
+                cameras[i] = child;
+                Debug.Log("child=" + child.ToString());
+                cameras[i].Initialize(child);
+                string pdu_name = my_name + "_" + cameras[i].GetAssetName() + "Pdu";
+                this.pdu_cameras[i] = this.pdu_io.GetWriter(pdu_name);
+                if (this.pdu_cameras[i] == null)
+                {
+                    throw new ArgumentException("can not found HakoEnvCamera pdu:" + pdu_name);
+                }
+                Debug.Log("Camera:pdu=" + pdu_name);
+                i++;
+            }
+        }
+        private void UpdateObstacleSensorValues()
         {
             int i = 0;
             foreach (var e in obstacles)
@@ -53,6 +78,31 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Environment
                 //Debug.Log("is_touch:" + this.is_touch[i]);
             }
             this.pdu_obstacles.GetWriteOps().SetData("is_touch", is_touch);
+        }
+        private void UpdateCameraSensorValues()
+        {
+            int i = 0;
+            foreach (var e in cameras)
+            {
+                e.UpdateSensorValues(this.pdu_cameras[i].GetReadOps().Ref(null));
+                i++;
+            }
+
+        }
+
+        public void Initialize()
+        {
+            this.root = GameObject.Find("HakoEnv");
+            Debug.Log("HakoEnv Enter");
+            this.pdu_io = PduIoConnector.Get(my_name);
+            this.InitializeObstacleMonitors();
+            this.InitializeCameras();
+
+        }
+        public void CopySensingDataToPdu()
+        {
+            this.UpdateObstacleSensorValues();
+            this.UpdateCameraSensorValues();
         }
 
         public void DoActuation()

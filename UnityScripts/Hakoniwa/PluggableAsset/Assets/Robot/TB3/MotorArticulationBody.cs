@@ -7,7 +7,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
     public class MotorArticulationBody : MonoBehaviour, IRobotMotor, IRobotMotorSensor
     {
-        private float power_const = 500;
+        public float power_const = 500;
         private float rotation_angle_rate = 0.0f;
         private float motor_radius = 3.3f; //3.3cm
 

@@ -100,6 +100,26 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             this.deg += diff;
 
         }
+
+        public void SetTargetVelicty(float targetVelocity)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float GetCurrentAngle()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float GetCurrentAngleVelocity()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float GetRadius()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

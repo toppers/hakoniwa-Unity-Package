@@ -40,6 +40,16 @@ namespace Hakoniwa.PluggableAsset.Assets.Environment
             this.isTouched = false;
             //Debug.Log("EXIT:" + t.gameObject.name);
         }
+
+        public void UpdateSensorValues(Pdu pdu)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetAssetName()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
