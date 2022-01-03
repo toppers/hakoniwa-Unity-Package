@@ -66,7 +66,7 @@ public class HakoniwaEditor : EditorWindow
         {
             foreach (var e in asset.getRosConfig())
             {
-                e.topic_message_name = asset.GetAssetName();
+                e.topic_message_name = root.name + "_" + asset.GetAssetName();
                 e.robot_name = root.name;
                 ros_topic_container.fields[asset_num] = e;
                 asset_num++;
@@ -89,7 +89,7 @@ public class HakoniwaEditor : EditorWindow
             }
             foreach ( var e in configs)
             {
-                //e.topic_message_name = root.name + "_" + e.topic_message_name;
+                e.topic_message_name = root.name + "_" + e.topic_message_name;
                 //e.topic_message_name = e.topic_message_name;
                 e.robot_name = root.name;
                 ros_topic_container.fields[asset_num] = e;
