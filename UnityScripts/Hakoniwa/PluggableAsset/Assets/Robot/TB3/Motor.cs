@@ -160,5 +160,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         {
             throw new System.NotImplementedException();
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            return null;
+        }
     }
 }

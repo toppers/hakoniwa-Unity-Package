@@ -26,7 +26,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
             this.cycle = c;
         }
     }
-    public class RobotController : MonoBehaviour, IInsideAssetController
+    public class RobotController : MonoBehaviour, IInsideAssetController, IRobotComponent
     {
         private GameObject root;
         private GameObject myObject;
@@ -386,6 +386,45 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
                 throw new ArgumentException("can not found CmdVel pdu:" + this.GetName() + "_cmd_velPdu");
             }
             motor_controller.Initialize(this.root, this.transform, this.parts, this.pdu_motor_control);
+        }
+
+        public void Initialize(object root)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string[] topic_type = {
+            "nav_msgs/Odometry",
+            "tf2_msgs/TFMessage",
+            "sensor_msgs/JointState"
+        };
+        public string[] topic_name = {
+            "odom",
+            "tf",
+            "joint_states"
+        };
+        public int[] update_cycle = {
+            10,
+            10,
+            10
+        };
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            RosTopicMessageConfig[] cfg = new RosTopicMessageConfig[topic_type.Length];
+            int i = 0;
+            for (i = 0; i < topic_type.Length; i++)
+            {
+                cfg[i] = new RosTopicMessageConfig();
+                cfg[i].topic_message_name = this.topic_name[i];
+                cfg[i].topic_type_name = this.topic_type[i];
+                cfg[i].sub = false;
+                cfg[i].pub_option = new RostopicPublisherOption();
+                cfg[i].pub_option.cycle_scale = this.update_cycle[i];
+                cfg[i].pub_option.latch = false;
+                cfg[i].pub_option.queue_size = 1;
+            }
+
+            return cfg;
         }
     }
 }

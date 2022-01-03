@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
-    public class MotorController
+    public class MotorController : MonoBehaviour, IRobotComponent
     {
         private IRobotMotor[] motors = new IRobotMotor[2];      // 0: R, 1: L
         private IRobotMotorSensor[] motor_sensors = new IRobotMotorSensor[2];      // 0: R, 1: L
@@ -115,5 +115,25 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         {
             return ((this.moving_distance[0] + this.moving_distance[1]) / 2.0f);
         }
+
+        public void Initialize(object root)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string topic_type = "geometry_msgs/cmd_vel";
+        public string topic_name = "cmd_vel";
+        public int update_cycle = 10;
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            RosTopicMessageConfig[] cfg = new RosTopicMessageConfig[1];
+            cfg[0] = new RosTopicMessageConfig();
+            cfg[0].topic_message_name = this.topic_name;
+            cfg[0].topic_type_name = this.topic_type;
+            cfg[0].sub = true;
+            return cfg;
+        }
+
+
     }
 }

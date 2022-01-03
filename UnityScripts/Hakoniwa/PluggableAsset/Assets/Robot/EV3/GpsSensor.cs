@@ -41,5 +41,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             //Debug.Log("x=" + pos.x + " y=" + pos.y);
             return;
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

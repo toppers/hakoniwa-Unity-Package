@@ -48,7 +48,22 @@ namespace Hakoniwa.PluggableAsset.Assets.Environment
 
         public string GetAssetName()
         {
-            throw new NotImplementedException();
+            return this.gameObject.name;
+        }
+
+        public string topic_type = "rule_msgs/HakoRuleObstacle";
+        public int update_cycle = 10;
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            RosTopicMessageConfig[] cfg = new RosTopicMessageConfig[1];
+            cfg[0] = new RosTopicMessageConfig();
+            cfg[0].topic_type_name = this.topic_type;
+            cfg[0].sub = false;
+            cfg[0].pub_option = new RostopicPublisherOption();
+            cfg[0].pub_option.cycle_scale = this.update_cycle;
+            cfg[0].pub_option.latch = false;
+            cfg[0].pub_option.queue_size = 1;
+            return cfg;
         }
     }
 

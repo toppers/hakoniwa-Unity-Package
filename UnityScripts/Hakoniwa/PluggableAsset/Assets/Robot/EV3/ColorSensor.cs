@@ -142,5 +142,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             value.g = this.sensor_rgb_g;
             value.b = this.sensor_rgb_b;
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

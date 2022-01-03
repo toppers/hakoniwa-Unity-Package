@@ -7,11 +7,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
 {
     public class MotorArticulationBody : MonoBehaviour, IRobotMotor, IRobotMotorSensor
     {
-        public float power_const = 500;
+        private float power_const = 500;
         private float rotation_angle_rate = 0.0f;
         private float motor_radius = 3.3f; //3.3cm
 
-        internal GameObject obj;
+        private GameObject obj;
         private float targetVelocity;
         private int force;
         private bool isStop;
@@ -162,6 +162,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
         public void SetTargetVelicty(int targetVelocity)
         {
             throw new System.NotImplementedException();
+        }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            return null;
         }
     }
 }

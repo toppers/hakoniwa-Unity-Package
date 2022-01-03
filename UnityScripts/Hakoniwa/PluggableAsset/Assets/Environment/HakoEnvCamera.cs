@@ -9,13 +9,15 @@ namespace Hakoniwa.PluggableAsset.Assets.Environment
     public class HakoEnvCamera : MonoBehaviour, IHakoEnvCamera
     {
         private Camera my_camera;
-        public RenderTexture RenderTextureRef;
+        private RenderTexture RenderTextureRef;
         private Texture2D tex;
         private byte[] raw_bytes;
         private byte[] jpg_bytes;
         private string frame_id = "camera_link";
         private int width = 640;
         private int height = 480;
+        private int count = 0;
+        public int cycle = 10;
 
         public void Initialize(object root)
         {
@@ -32,8 +34,7 @@ namespace Hakoniwa.PluggableAsset.Assets.Environment
             return this.name;
         }
 
-
-        public void UpdateSensorValues(Pdu pdu)
+        private void UpdateCameraSensor(Pdu pdu)
         {
             this.UpdateSensorValues();
             if (pdu.GetName() == "sensor_msgs/CompressedImage")
@@ -46,6 +47,15 @@ namespace Hakoniwa.PluggableAsset.Assets.Environment
             else
             {
                 Debug.LogError("MSG Type is Not Found: " + pdu.GetName());
+            }
+        }
+        public void UpdateSensorValues(Pdu pdu)
+        {
+            this.count++;
+            if (this.count >= this.cycle)
+            {
+                this.UpdateCameraSensor(pdu);
+                this.count = 0;
             }
         }
 
@@ -71,6 +81,22 @@ namespace Hakoniwa.PluggableAsset.Assets.Environment
             // Encode texture into JPG
             jpg_bytes = tex.EncodeToJPG();
             Object.Destroy(tex);
+        }
+
+
+        public string topic_type = "sensor_msgs/CompressedImage";
+        public int update_cycle = 100;
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            RosTopicMessageConfig[] cfg = new RosTopicMessageConfig[1];
+            cfg[0] = new RosTopicMessageConfig();
+            cfg[0].topic_type_name = this.topic_type;
+            cfg[0].sub = false;
+            cfg[0].pub_option = new RostopicPublisherOption();
+            cfg[0].pub_option.cycle_scale = this.update_cycle;
+            cfg[0].pub_option.latch = false;
+            cfg[0].pub_option.queue_size = 1;
+            return cfg;
         }
     }
 }

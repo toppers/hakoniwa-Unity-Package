@@ -9,6 +9,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
         public Material[] materials = new Material[4];
         private Renderer rend;
 
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Initialize(System.Object root)
         {
             rend = GetComponent<Renderer>();

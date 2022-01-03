@@ -70,6 +70,39 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.TB3
               Debug.Log("MSG Type is Not Found: " + pdu.GetName());
             }
         }
+        public string [] topic_type = {
+            "sensor_msgs/Image",
+            "sensor_msgs/CompressedImage",
+            "sensor_msgs/CameraInfo"
+        };
+        public string [] topic_name = {
+            "image",
+            "image/compressed",
+            "camera_info"
+        };
+        public int [] update_cycle = {
+            100,
+            100,
+            10
+        };
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            RosTopicMessageConfig[] cfg = new RosTopicMessageConfig[topic_type.Length];
+            int i = 0;
+            for (i = 0; i < topic_type.Length; i++)
+            {
+                cfg[i] = new RosTopicMessageConfig();
+                cfg[i].topic_message_name = this.topic_name[i];
+                cfg[i].topic_type_name = this.topic_type[i];
+                cfg[i].sub = false;
+                cfg[i].pub_option = new RostopicPublisherOption();
+                cfg[i].pub_option.cycle_scale = this.update_cycle[i];
+                cfg[i].pub_option.latch = false;
+                cfg[i].pub_option.queue_size = 1;
+            }
+
+            return cfg;
+        }
     }
 }
 

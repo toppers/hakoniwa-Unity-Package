@@ -79,5 +79,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             this.prevRotation = this.obj.transform.eulerAngles;
             //Debug.Log("deg=" + (int)this.GetDegree() + ":deg_rate=" + (int)this.deg_rate);
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

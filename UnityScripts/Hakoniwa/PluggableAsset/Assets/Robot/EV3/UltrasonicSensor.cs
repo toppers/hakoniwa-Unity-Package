@@ -84,6 +84,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             }
             this.distanceValue = min;
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

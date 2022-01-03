@@ -120,6 +120,11 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
         {
             throw new System.NotImplementedException();
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

@@ -48,5 +48,10 @@ namespace Hakoniwa.PluggableAsset.Assets.Robot.EV3
             this.isTouched = false;
             //Debug.Log("NotPressed");
         }
+
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

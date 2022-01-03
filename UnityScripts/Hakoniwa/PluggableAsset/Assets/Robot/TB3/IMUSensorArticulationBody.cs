@@ -1,3 +1,4 @@
+using Hakoniwa.PluggableAsset;
 using Hakoniwa.PluggableAsset.Assets.Robot;
 using Hakoniwa.PluggableAsset.Communication.Pdu;
 using System.Collections;
@@ -106,6 +107,23 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot.TB3
             pos.y = this.transform.position.y;
             pos.x = this.transform.position.z;
             return pos;
+        }
+
+        public string topic_type = "sensor_msgs/Imu";
+        public string topic_name = "imu";
+        public int update_cycle = 10;
+        public RosTopicMessageConfig[] getRosConfig()
+        {
+            RosTopicMessageConfig[] cfg = new RosTopicMessageConfig[1];
+            cfg[0] = new RosTopicMessageConfig();
+            cfg[0].topic_message_name = this.topic_name;
+            cfg[0].topic_type_name = this.topic_type;
+            cfg[0].sub = false;
+            cfg[0].pub_option = new RostopicPublisherOption();
+            cfg[0].pub_option.cycle_scale = this.update_cycle;
+            cfg[0].pub_option.latch = false;
+            cfg[0].pub_option.queue_size = 1;
+            return cfg;
         }
     }
 

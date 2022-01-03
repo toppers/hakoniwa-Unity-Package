@@ -1,4 +1,5 @@
 ﻿using Hakoniwa.Core.Utils;
+using Hakoniwa.PluggableAsset;
 using Hakoniwa.PluggableAsset.Assets.Robot;
 using Hakoniwa.PluggableAsset.Communication.Pdu;
 using System;
@@ -108,6 +109,11 @@ namespace Assets.Scripts.Hakoniwa.PluggableAsset.Assets.Robot.TB3
             pos.y = this.transform.position.y;
             pos.x = this.transform.position.z;
             return pos;
+        }
+
+        public RosTopicMessageConfig [] getRosConfig()
+        {
+            return null;
         }
     }
 }
